@@ -36,7 +36,7 @@ export class ByteStream {
     hmac.update(prefix)
     hmac.update(counter)
 
-    const block = hmac.digest()
+    const block = new Uint8Array(hmac.digest())
 
     this.buffer = []
     for (let i = 0; i < block.length; i++) {

@@ -2,11 +2,11 @@ import { describe, it, expect } from 'vitest'
 import { deriveSiteKey } from '../src/kdf.js'
 import { encodeContext } from '../src/context.js'
 import { TEST_KDF } from './fixtures/kdf.js'
-import { FULL_PROFILE, makeProfile  } from './fixtures/profiles.js'
+import { DEFAULT_PROFILE, makeProfile  } from './fixtures/profiles.js'
 
 describe('deriveSiteKey', () => {
   it('is deterministic', async () => {
-    const context = encodeContext(FULL_PROFILE)
+    const context = encodeContext(DEFAULT_PROFILE)
 
     const a = await deriveSiteKey('master', context, TEST_KDF)
     const b = await deriveSiteKey('master', context, TEST_KDF)
@@ -15,7 +15,7 @@ describe('deriveSiteKey', () => {
   })
 
   it('changes when master password changes', async () => {
-    const context = encodeContext(FULL_PROFILE)
+    const context = encodeContext(DEFAULT_PROFILE)
 
     const a = await deriveSiteKey('master-one', context, TEST_KDF)
     const b = await deriveSiteKey('master-two', context, TEST_KDF)
@@ -24,7 +24,7 @@ describe('deriveSiteKey', () => {
   })
 
   it('changes when context changes', async () => {
-    const c1 = encodeContext(FULL_PROFILE)
+    const c1 = encodeContext(DEFAULT_PROFILE)
     const c2 = encodeContext(makeProfile({ counter: 2 }))
 
     const a = await deriveSiteKey('master', c1, TEST_KDF)
@@ -34,7 +34,7 @@ describe('deriveSiteKey', () => {
   })
 
   it('returns 32 bytes', async () => {
-    const context = encodeContext(FULL_PROFILE)
+    const context = encodeContext(DEFAULT_PROFILE)
     const key = await deriveSiteKey('master', context, TEST_KDF)
 
     expect(key).toBeInstanceOf(Uint8Array)
@@ -42,7 +42,7 @@ describe('deriveSiteKey', () => {
   })
 
   it('returns different keys for different Unicode-normalized master passwords only when actually different', async () => {
-    const context = encodeContext(FULL_PROFILE)
+    const context = encodeContext(DEFAULT_PROFILE)
 
     const a = await deriveSiteKey('café', context, TEST_KDF)
     const b = await deriveSiteKey('cafe\u0301', context, TEST_KDF)
@@ -51,7 +51,7 @@ describe('deriveSiteKey', () => {
   })
 
   it('is stable across repeated calls', () => {
-    const context = encodeContext(FULL_PROFILE)
+    const context = encodeContext(DEFAULT_PROFILE)
 
     const outputs = Array.from({ length: 3 }, async () =>
       Array.from(await deriveSiteKey('master', context, TEST_KDF))
@@ -65,7 +65,7 @@ describe('deriveSiteKey', () => {
 
 describe('deriveSiteKey (production Argon2)', () => {
   it('works with production Argon2 parameters [slow]', async () => {
-    const context = encodeContext(FULL_PROFILE)
+    const context = encodeContext(DEFAULT_PROFILE)
 
     const key = await deriveSiteKey('master', context)
 

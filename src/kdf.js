@@ -1,12 +1,16 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
+// IntelliJ may fail to resolve this subpath import, but Node/Vitest handle it correctly.
+// noinspection JSFileReferences
 import setupWasm from 'argon2id/lib/setup.js'
 import { ARGON2_PARAMS } from './argon2params.js'
 import { normalizeText } from './text.js'
 
-// This module provides the Node/test Argon2id loader.
-// The browser runtime should use a browser-specific loader.
+/**
+ * This module provides the Node/test Argon2id loader.
+ * The browser runtime should use a browser-specific loader.
+ */
 
 let argon2idPromise = null
 

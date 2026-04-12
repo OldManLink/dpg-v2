@@ -1,5 +1,6 @@
-export const FULL_PROFILE = {
+export const DEFAULT_PROFILE = {
   version: 'dpg:v2',
+  label: 'github-main',
   service: 'github.com',
   account: 'peter@example.com',
   counter: 1,
@@ -10,7 +11,7 @@ export const FULL_PROFILE = {
 
 export function makeProfile(overrides = {}) {
   return {
-    ...FULL_PROFILE,
+    ...DEFAULT_PROFILE,
     ...overrides
   }
 }

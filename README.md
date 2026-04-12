@@ -1,6 +1,31 @@
+![License: MIT](https://img.shields.io/badge/license-MIT-green)
+![Version](https://img.shields.io/badge/version-0.1.0-blue)
+![Node](https://img.shields.io/badge/node-18%2B-brightgreen)
 # DPG v2
 
-**Deterministic Password Generator**
+> Local-first deterministic password generator.  
+> No vault. No sync. No cloud. No password storage.
+
+DPG v2 derives site-specific passwords from a master password plus structured profile metadata, so the same inputs always produce the same password.
+
+## Current status
+
+- Working CLI
+- Profile-driven workflow
+- Argon2id-based derivation
+- Full automated test suite
+- Planned offline browser UI
+
+## Quick start
+
+```bash
+npm install
+npm test
+npm link
+dpg -p github-main
+```
+
+## Deterministic Password Generator
 
 DPG v2 is a local-first password generator that **does not store passwords at all**.
 
@@ -65,7 +90,7 @@ It relies on:
 ### Important caveats
 
 * If your master password is weak, everything is weak
-* Clipboard usage is inherently unsafe (best-effort clearing only)
+* Clipboard usage is inherently unsafe
 * A hosted web version should be treated as a demo, not trusted for real use
 * This is a tool for technically literate users
 
@@ -120,6 +145,52 @@ npm run test:slow
 ```
 
 ---
+
+## CLI
+
+DPG v2 includes a CLI for generating a password from an existing profile and copying it to the clipboard.
+
+### Usage
+
+    dpg -p github-main
+
+This will:
+- load the profile with label `github-main`
+- prompt for the master password
+- generate the current password
+- copy it to the clipboard
+
+### Options
+
+    dpg -p <label>
+    dpg --profile <label>
+    dpg -p <label> --show
+    dpg --help
+
+`--show` also prints the generated password to stdout.
+
+### Profiles file location
+
+DPG v2 looks for profiles here by default:
+
+- macOS/Linux: `~/.dpg-v2/profiles.json`
+- Windows: `%USERPROFILE%\.dpg-v2\profiles.json`
+
+### Installation for local development
+
+    npm install
+    npm link
+
+After that, the `dpg` command should be available in your shell.
+
+### Clipboard support
+
+DPG v2 uses native platform tools:
+
+- macOS: `pbcopy`
+- Windows: `clip`
+- Linux: `wl-copy`, `xclip`, or `xsel`
+- (planned) Best-effort clipboard cleaning where supported
 
 ## 🌐 Usage (planned)
 

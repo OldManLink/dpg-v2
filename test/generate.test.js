@@ -1,63 +1,86 @@
-import { describe, it, expect } from 'vitest'
-import { generatePassword } from '../src/generate.js'
-import { TEST_KDF } from './fixtures/kdf.js'
-import { FULL_PROFILE, makeProfile } from './fixtures/profiles.js'
-import {encodeContext} from "../src/context.js";
-import {deriveSiteKey} from "../src/kdf.js";
+import {describe, expect, it} from 'vitest'
+import {generatePassword} from '../src/generate.js'
+import {TEST_KDF} from './fixtures/kdf.js'
+import {DEFAULT_PROFILE, makeProfile} from './fixtures/profiles.js'
 
 describe('generatePassword', () => {
   it('is deterministic for the same master password and profile', async () => {
-    const a = await generatePassword('correct horse battery staple', FULL_PROFILE, TEST_KDF)
-    const b = await generatePassword('correct horse battery staple', FULL_PROFILE, TEST_KDF)
+    const a = await generatePassword('correct horse battery staple', DEFAULT_PROFILE, TEST_KDF)
+    const b = await generatePassword('correct horse battery staple', DEFAULT_PROFILE, TEST_KDF)
 
     expect(a).toBe(b)
   })
 
   it('changes when the master password changes', async () => {
-    const a = await generatePassword('master one', FULL_PROFILE, TEST_KDF)
-    const b = await generatePassword('master two', FULL_PROFILE, TEST_KDF)
+    const a = await generatePassword('master one', DEFAULT_PROFILE, TEST_KDF)
+    const b = await generatePassword('master two', DEFAULT_PROFILE, TEST_KDF)
 
     expect(a).not.toBe(b)
   })
 
   it('changes when the service changes', async () => {
-    const a = await generatePassword('master', FULL_PROFILE, TEST_KDF)
-    const b = await generatePassword('master', makeProfile({ service: 'gitlab.com' }), TEST_KDF)
+    const a = await generatePassword('master', DEFAULT_PROFILE, TEST_KDF)
+    const b = await generatePassword('master', makeProfile({service: 'gitlab.com'}), TEST_KDF)
 
     expect(a).not.toBe(b)
   })
 
   it('changes when the counter changes', async () => {
-    const a = await generatePassword('master', FULL_PROFILE, TEST_KDF)
-    const b = await generatePassword('master', makeProfile({ counter: 2 }), TEST_KDF)
+    const a = await generatePassword('master', DEFAULT_PROFILE, TEST_KDF)
+    const b = await generatePassword('master', makeProfile({counter: 2}), TEST_KDF)
 
     expect(a).not.toBe(b)
   })
 
   it('respects the profile length', async () => {
-    const password = await generatePassword('master', makeProfile({ length: 16 }), TEST_KDF)
+    const password = await generatePassword('master', makeProfile({length: 16}), TEST_KDF)
 
     expect(password).toHaveLength(16)
   })
 
   it('rejects an empty master password', async () => {
-    await expect(
-      generatePassword('', FULL_PROFILE, TEST_KDF)
-    ).rejects.toThrow(/master password/i)
+    const {toThrow} = expect(
+        generatePassword('', DEFAULT_PROFILE, TEST_KDF)
+    // IntelliJ doesn't understand `.rejects`. The test runner does. We trust the test runner.
+    )["rejects"];
+    await toThrow(/master password/i)
   })
 
 })
 
 describe('generatePassword (production Argon2)', () => {
   it('works end-to-end with production Argon2 parameters [slow]', async () => {
-    const password = await generatePassword('master', FULL_PROFILE)
+    const password = await generatePassword('master', DEFAULT_PROFILE)
 
-    expect(password).toHaveLength(FULL_PROFILE.length)
+    expect(password).toHaveLength(DEFAULT_PROFILE.length)
     expect(password).toMatch(/[a-z]/)
     expect(password).toMatch(/[A-Z]/)
     expect(password).toMatch(/[0-9]/)
     expect(password).toMatch(/[!@#]/)
   })
 
+  // Golden test. If this fails, either:
+  // 1) you improved the algorithm (unlikely), or
+  // 2) you broke something (more likely)
+  it('[golden] produces expected password for known inputs', async () => {
+    const profile = {
+      version: 'dpg:v2',
+      label: 'andrew-test',
+      service: 'Andrew Martin',
+      account: '',
+      counter: 42,
+      length: 16,
+      require: ['lower', 'upper', 'digit', 'symbol'],
+      symbolSet: '!@#{}[]()+-'
+    }
+
+    const password = await generatePassword(
+      'Walking Thoughts',
+      profile
+    )
+
+    // Golden test: if this changes, the derivation behavior changed.
+    expect(password).toBe('u)L]y5e}9X{WwUD)')
+  })
 })
 

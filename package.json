@@ -1,0 +1,18 @@
+{
+  "name": "dpg-v2",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "vitest",
+    "test:verbose": "vitest --reporter=verbose",
+    "test:slow": "vitest -t \"\\[slow\\]\" --reporter=verbose"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "vitest": "^3.2.4"
+  },
+  "dependencies": {
+    "argon2id": "^1.0.0"
+  }
+}

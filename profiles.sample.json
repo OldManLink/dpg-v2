@@ -1,0 +1,15 @@
+[
+  {
+    "version": "dpg:v2",
+    "label": "github-main",
+    "service": "github.com",
+    "account": "name@example.com",
+    "counter": 1,
+    "length": 20,
+    "require": ["lower", "upper", "digit", "symbol"],
+    "symbolSet": "!@#",
+    "notes": "Example profile",
+    "createdAt": "2026-04-12T00:00:00Z",
+    "updatedAt": "2026-04-12T00:00:00Z"
+  }
+]

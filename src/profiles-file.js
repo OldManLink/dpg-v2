@@ -62,3 +62,29 @@ export async function loadProfileByLabel(label, options = {}) {
 
   return findProfileByLabel(parsed, label)
 }
+
+export async function loadAllProfiles(options = {}) {
+  const profilesPath = options.profilesPath ?? resolveProfilesPath()
+  const text = await fs.readFile(profilesPath, 'utf8')
+  const parsed = JSON.parse(text)
+
+  if (!Array.isArray(parsed)) {
+    throw new Error('Profiles file must contain a JSON array')
+  }
+
+  return parsed
+}
+
+export async function saveProfiles(profiles, options = {}) {
+  const profilesPath = options.profilesPath ?? resolveProfilesPath()
+  const tmpPath = profilesPath + '.tmp'
+
+  const sorted = [...profiles].sort((a, b) =>
+    a.label.localeCompare(b.label)
+  )
+
+  const json = JSON.stringify(sorted)
+
+  await fs.writeFile(tmpPath, json, 'utf8')
+  await fs.rename(tmpPath, profilesPath)
+}

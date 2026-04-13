@@ -1,6 +1,7 @@
 import { describe, it, expect, vi } from 'vitest'
 import { runCli } from '../src/cli-runner.js'
 import { DEFAULT_PROFILE } from './fixtures/profiles.js'
+import { makeCliArgs } from './fixtures/cli.js'
 
 describe('runCli', () => {
   it('loads profile, prompts for password, generates, copies, and prints success', async () => {
@@ -12,7 +13,7 @@ describe('runCli', () => {
     const stderr = { write: vi.fn() }
 
     const exitCode = await runCli(
-      { profileLabel: 'github-main', show: false, help: false },
+      makeCliArgs({ profileLabel: 'github-main', show: false, help: false }),
       {
         loadProfileByLabel,
         promptForMasterPassword,
@@ -35,7 +36,7 @@ describe('runCli', () => {
     const stdout = { write: vi.fn() }
 
     const exitCode = await runCli(
-      { profileLabel: 'github-main', show: true, help: false },
+      makeCliArgs({ profileLabel: 'github-main', show: true, help: false }),
       {
         loadProfileByLabel: async () => DEFAULT_PROFILE,
         promptForMasterPassword: async () => 'master',
@@ -54,7 +55,7 @@ describe('runCli', () => {
     const stdout = { write: vi.fn() }
 
     const exitCode = await runCli(
-      { profileLabel: null, show: false, help: true },
+      makeCliArgs({ profileLabel: null, show: false, help: true }),
       {
         stdout,
         stderr: { write: vi.fn() }
@@ -69,7 +70,7 @@ describe('runCli', () => {
     const stderr = { write: vi.fn() }
 
     const exitCode = await runCli(
-      { profileLabel: 'missing', show: false, help: false },
+      makeCliArgs({ profileLabel: 'missing', show: false, help: false }),
       {
         loadProfileByLabel: async () => {
           throw new Error('Profile not found: missing')

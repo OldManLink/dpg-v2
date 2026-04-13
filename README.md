@@ -103,6 +103,7 @@ It relies on:
 * Canonical context encoding
 * Bias-free character selection
 * Profile-driven workflow
+* Cross-platform CLI with profile generation, listing, and bump/save workflow
 * Full test suite (fast + slow paths)
 
 ---
@@ -148,26 +149,58 @@ npm run test:slow
 
 ## CLI
 
-DPG v2 includes a CLI for generating a password from an existing profile and copying it to the clipboard.
+DPG v2 includes a CLI for generating passwords from existing profiles.
 
-### Usage
+### Generate from profile
 
     dpg -p github-main
 
 This will:
+
 - load the profile with label `github-main`
 - prompt for the master password
 - generate the current password
 - copy it to the clipboard
 
-### Options
+### Show the generated password
 
-    dpg -p <label>
-    dpg --profile <label>
-    dpg -p <label> --show
+    dpg -p github-main --show
+
+This also prints the generated password to stdout.
+
+### List profiles
+
+    dpg --list
+
+This prints the available profiles in sorted order.
+
+### Bump a profile counter without saving
+
+    dpg -b github-main
+
+This will:
+
+- load the profile
+- increment the counter in memory only
+- generate the password for the bumped counter
+- copy it to the clipboard
+- report the old and new counter values
+
+### Bump and save
+
+    dpg -b github-main --save
+
+This does the same thing, but also persists the incremented counter back to `profiles.json`, and reports it as saved.
+
+### Bump, save, and show
+
+    dpg -b github-main --save --show
+
+This also prints the generated password to stdout.
+
+### Help
+
     dpg --help
-
-`--show` also prints the generated password to stdout.
 
 ### Profiles file location
 

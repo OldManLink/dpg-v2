@@ -6,7 +6,10 @@ describe('parseArgs', () => {
     expect(parseArgs(['-p', 'github-main'])).toEqual({
       profileLabel: 'github-main',
       show: false,
-      help: false
+      help: false,
+      bump: null,
+      list: false,
+      save: false
     })
   })
 
@@ -14,7 +17,10 @@ describe('parseArgs', () => {
     expect(parseArgs(['--profile', 'github-main', '--show'])).toEqual({
       profileLabel: 'github-main',
       show: true,
-      help: false
+      help: false,
+      bump: null,
+      list: false,
+      save: false
     })
   })
 
@@ -22,7 +28,32 @@ describe('parseArgs', () => {
     expect(parseArgs(['--help'])).toEqual({
       profileLabel: null,
       show: false,
-      help: true
+      help: true,
+      bump: null,
+      list: false,
+      save: false
+    })
+  })
+
+  it('parses -b <label>', () => {
+    expect(parseArgs(['-b', 'github-main'])).toEqual({
+      profileLabel: null,
+      show: false,
+      help: false,
+      list: false,
+      bump: 'github-main',
+      save: false
+    })
+  })
+
+  it('parses --bump <label> --save --show', () => {
+    expect(parseArgs(['--bump', 'github-main', '--save', '--show'])).toEqual({
+      profileLabel: null,
+      show: true,
+      help: false,
+      list: false,
+      bump: 'github-main',
+      save: true
     })
   })
 

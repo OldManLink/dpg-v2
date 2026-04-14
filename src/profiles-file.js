@@ -3,6 +3,22 @@ import path from 'node:path'
 import fs from 'node:fs/promises'
 
 /**
+ * @typedef {{
+ *   version: string,
+ *   label: string,
+ *   service: string,
+ *   account?: string,
+ *   counter: number,
+ *   length: number,
+ *   require: string[],
+ *   symbolSet?: string,
+ *   notes?: string,
+ *   createdAt?: string,
+ *   updatedAt?: string
+ * }} Profile
+ */
+
+/**
  * @param {{ platform?: string, homeDir?: string }=} options
  * @returns {string}
  */
@@ -61,4 +77,45 @@ export async function loadProfileByLabel(label, options = {}) {
   }
 
   return findProfileByLabel(parsed, label)
+}
+
+export async function loadAllProfiles(options = {}) {
+  const profilesPath = options.profilesPath ?? resolveProfilesPath()
+
+  let text
+  try {
+    text = await fs.readFile(profilesPath, 'utf8')
+  } catch (err) {
+    if (err && err.code === 'ENOENT') {
+      return []
+    }
+    throw err
+  }
+
+  const parsed = JSON.parse(text)
+
+  if (!Array.isArray(parsed)) {
+    throw new Error('Profiles file must contain a JSON array')
+  }
+
+  return parsed
+}
+
+/**
+ * @param {Profile[]} profiles
+ * @param {{ profilesPath?: string }=} options
+ * @returns {Promise<void>}
+ */
+export async function saveProfiles(profiles, options = {}) {
+  const profilesPath = options.profilesPath ?? resolveProfilesPath()
+  const tmpPath = profilesPath + '.tmp'
+
+  const sorted = [...profiles].sort((a, b) =>
+    a.label.localeCompare(b.label)
+  )
+
+  const json = JSON.stringify(sorted)
+
+  await fs.writeFile(tmpPath, json, 'utf8')
+  await fs.rename(tmpPath, profilesPath)
 }

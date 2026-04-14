@@ -3,7 +3,7 @@ import { tmpdir } from 'node:os'
 import fs from 'node:fs/promises'
 import { mkdtemp } from 'node:fs/promises'
 import path from 'node:path'
-import { resolveProfilesPath, findProfileByLabel, loadProfileByLabel } from '../src/profiles-file.js'
+import {resolveProfilesPath, findProfileByLabel, loadProfileByLabel, loadAllProfiles} from '../src/profiles-file.js'
 import { makeProfile } from './fixtures/profiles.js'
 
 describe('resolveProfilesPath', () => {
@@ -88,5 +88,11 @@ describe('loadProfileByLabel', () => {
 
     expect(result.label).toBe('gitlab-main')
     expect(result.service).toBe('gitlab.com')
+  })
+
+  it('returns empty array when profiles file is missing', async () => {
+    const missingPath = path.join('/definitely', 'not-there', 'profiles.json')
+    const result = await loadAllProfiles({ profilesPath: missingPath })
+    expect(result).toEqual([])
   })
 })

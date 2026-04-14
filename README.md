@@ -286,3 +286,12 @@ Before using it for real passwords:
 ## 📜 License
 
 See `LICENSE`
+
+## ₿ Support / Tip Jar
+
+If you find this project useful, feel free to send a small tip:
+
+**Bitcoin (BTC)**  
+`bc1q33q5908wfmwt7h59zl70ad3260e4esnfjtj4xw`
+
+No pressure — just a nod to the idea that sparked this project.

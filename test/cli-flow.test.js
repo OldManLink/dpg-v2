@@ -384,4 +384,36 @@ describe('runCli', () => {
     expect(exitCode).toBe(1)
     expect(stderr.write).toHaveBeenCalledWith(expect.stringMatching(/does not exist/i))
   })
+
+  it('does not report deletion if save fails after confirmation', async () => {
+    const profiles = [
+      makeProfile({ label: 'github-main' }),
+      makeProfile({ label: 'gitlab-main', service: 'gitlab.com' })
+    ]
+
+    const stdout = { write: vi.fn() }
+    const stderr = { write: vi.fn() }
+
+    const exitCode = await runCli(
+      makeCliArgs({ deleteLabel: 'github-main' }),
+      {
+        loadAllProfiles: async () => profiles,
+        saveProfiles: async () => {
+          throw new Error('disk full')
+        },
+        promptForConfirmation: async () => 'y',
+        stdout,
+        stderr
+      }
+    )
+
+    expect(exitCode).toBe(1)
+
+    const out = stdout.write.mock.calls.map(c => c[0]).join('')
+    expect(out).not.toMatch(/Deleted profile/i)
+
+    expect(stderr.write).toHaveBeenCalledWith(
+      expect.stringMatching(/disk full/i)
+    )
+  })
 })

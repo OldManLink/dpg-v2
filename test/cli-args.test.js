@@ -10,7 +10,8 @@ describe('parseArgs', () => {
       bump: null,
       list: false,
       save: false,
-      create: null
+      create: null,
+      deleteLabel: null
     })
   })
 
@@ -22,7 +23,8 @@ describe('parseArgs', () => {
       bump: null,
       list: false,
       save: false,
-      create: null
+      create: null,
+      deleteLabel: null
     })
   })
 
@@ -34,7 +36,8 @@ describe('parseArgs', () => {
       list: false,
       bump: null,
       save: false,
-      create: 'github-main'
+      create: 'github-main',
+      deleteLabel: null
     })
   })
 
@@ -46,12 +49,43 @@ describe('parseArgs', () => {
       list: false,
       bump: null,
       save: false,
-      create: 'github-main'
+      create: 'github-main',
+      deleteLabel: null
     })
   })
 
   it('throws if label is missing after -n/--new', () => {
     expect(() => parseArgs(['-n'])).toThrow(/label/i)
+  })
+
+  it('parses -D <label>', () => {
+    expect(parseArgs(['-D', 'github-main'])).toEqual({
+      profileLabel: null,
+      show: false,
+      help: false,
+      list: false,
+      bump: null,
+      save: false,
+      create: null,
+      deleteLabel: 'github-main'
+    })
+  })
+
+  it('parses --delete <label>', () => {
+    expect(parseArgs(['--delete', 'github-main'])).toEqual({
+      profileLabel: null,
+      show: false,
+      help: false,
+      list: false,
+      bump: null,
+      save: false,
+      create: null,
+      deleteLabel: 'github-main'
+    })
+  })
+
+  it('throws if label is missing after -D/--delete', () => {
+    expect(() => parseArgs(['-D'])).toThrow(/label/i)
   })
 
   it('parses --help', () => {
@@ -62,7 +96,8 @@ describe('parseArgs', () => {
       bump: null,
       list: false,
       save: false,
-      create: null
+      create: null,
+      deleteLabel: null
     })
   })
 
@@ -74,7 +109,8 @@ describe('parseArgs', () => {
       list: false,
       bump: 'github-main',
       save: false,
-      create: null
+      create: null,
+      deleteLabel: null
     })
   })
 
@@ -86,7 +122,8 @@ describe('parseArgs', () => {
       list: false,
       bump: 'github-main',
       save: true,
-      create: null
+      create: null,
+      deleteLabel: null
     })
   })
 

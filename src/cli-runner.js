@@ -4,6 +4,7 @@ import {promptForMasterPassword} from './prompt.js'
 import {generatePassword} from './generate.js'
 import {copyToClipboard} from './clipboard.js'
 import {usageText} from './cli-args.js'
+import { promptForConfirmation } from './confirm.js'
 
 /**
  * @typedef {{
@@ -13,6 +14,7 @@ import {usageText} from './cli-args.js'
  *   promptForMasterPassword?: () => Promise<string>,
  *   generatePassword?: (master: string, profile: any) => Promise<string>,
  *   copyToClipboard?: (text: string) => Promise<void>,
+ *   promptForConfirmation?: (prompt: string) => Promise<string>,
  *   stdout?: { write: (s: string) => void },
  *   stderr?: { write: (s: string) => void }
  * }} CliDeps
@@ -31,6 +33,7 @@ export async function runCli(args, deps = {}) {
     promptForMasterPassword: prompt = promptForMasterPassword,
     generatePassword: generate = generatePassword,
     copyToClipboard: copy = copyToClipboard,
+    promptForConfirmation: confirm = promptForConfirmation,
     stdout = process.stdout,
     stderr = process.stderr
   } = deps
@@ -40,8 +43,8 @@ export async function runCli(args, deps = {}) {
     return 0
   }
 
-  if (!args.profileLabel && !args.bump && !args.create && !args.list) {
-    stderr.write('No command specified. Use -p <label>, -b <label>, -n <label>, or --list. See -h for help.\n')
+  if (!args.profileLabel && !args.bump && !args.create && !args.deleteLabel && !args.list) {
+    stderr.write('No command specified. Use -p <label>, -b <label>, -n <label>, -D <label>, or --list. See -h for help.\n')
     return 1
   }
 
@@ -121,6 +124,31 @@ export async function runCli(args, deps = {}) {
       await save([...all, profile])
 
       stdout.write(`Created profile: '${args.create}'\n`)
+      return 0
+    }
+
+    if (args.deleteLabel) {
+      const all = await loadAll()
+      const existing = all.find(p => p.label === args.deleteLabel)
+
+      if (!existing) {
+        stderr.write(`Profile does not exist: '${args.deleteLabel}'\n`)
+        return 1
+      }
+
+      const answer = await confirm(
+        `Delete profile '${args.deleteLabel}'? This cannot be undone. (y/N) `
+      )
+
+      if (answer !== 'y') {
+        stdout.write('Cancelled\n')
+        return 0
+      }
+
+      const remaining = all.filter(p => p.label !== args.deleteLabel)
+      await save(remaining)
+
+      stdout.write(`Deleted profile: '${args.deleteLabel}'\n`)
       return 0
     }
 

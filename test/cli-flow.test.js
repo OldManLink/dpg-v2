@@ -293,4 +293,95 @@ describe('runCli', () => {
     expect(saved[0].label).toBe('github-main')
     expect(saved[0].counter).toBe(0)
   })
+
+  it('deletes an existing profile after confirmation', async () => {
+    const profiles = [
+      makeProfile({ label: 'github-main' }),
+      makeProfile({ label: 'gitlab-main', service: 'gitlab.com' })
+    ]
+
+    /** @type {import('../src/profiles-file.js').Profile[] | null} */
+    let savedProfiles = null
+
+    const stdout = { write: vi.fn() }
+
+    const exitCode = await runCli(
+      makeCliArgs({ deleteLabel: 'github-main' }),
+      {
+        loadAllProfiles: async () => profiles,
+        saveProfiles: async p => { savedProfiles = p },
+        promptForConfirmation: async () => 'y',
+        stdout,
+        stderr: { write: vi.fn() }
+      }
+    )
+
+    expect(exitCode).toBe(0)
+    expect(savedProfiles).not.toBeNull()
+
+    if (!savedProfiles) throw new Error('not saved')
+
+    expect(savedProfiles).toHaveLength(1)
+    expect(savedProfiles[0].label).toBe('gitlab-main')
+    expect(stdout.write).toHaveBeenCalledWith("Deleted profile: 'github-main'\n")
+  })
+
+  it('cancels deletion on default response', async () => {
+    const profiles = [makeProfile({ label: 'github-main' })]
+    let saveCalled = false
+    const stdout = { write: vi.fn() }
+
+    const exitCode = await runCli(
+      makeCliArgs({ deleteLabel: 'github-main' }),
+      {
+        loadAllProfiles: async () => profiles,
+        saveProfiles: async () => { saveCalled = true },
+        promptForConfirmation: async () => '',
+        stdout,
+        stderr: { write: vi.fn() }
+      }
+    )
+
+    expect(exitCode).toBe(0)
+    expect(saveCalled).toBe(false)
+    expect(stdout.write).toHaveBeenCalledWith('Cancelled\n')
+  })
+
+  it('cancels deletion on non-y response', async () => {
+    const profiles = [makeProfile({ label: 'github-main' })]
+    let saveCalled = false
+    const stdout = { write: vi.fn() }
+
+    const exitCode = await runCli(
+      makeCliArgs({ deleteLabel: 'github-main' }),
+      {
+        loadAllProfiles: async () => profiles,
+        saveProfiles: async () => { saveCalled = true },
+        promptForConfirmation: async () => 'n',
+        stdout,
+        stderr: { write: vi.fn() }
+      }
+    )
+
+    expect(exitCode).toBe(0)
+    expect(saveCalled).toBe(false)
+    expect(stdout.write).toHaveBeenCalledWith('Cancelled\n')
+  })
+
+  it('fails when deleting a non-existent profile', async () => {
+    const stderr = { write: vi.fn() }
+
+    const exitCode = await runCli(
+      makeCliArgs({ deleteLabel: 'missing' }),
+      {
+        loadAllProfiles: async () => [makeProfile({ label: 'github-main' })],
+        promptForConfirmation: async () => 'y',
+        stdout: { write: vi.fn() },
+        stderr
+      }
+    )
+
+    expect(exitCode).toBe(1)
+    expect(stderr.write).toHaveBeenCalledWith(expect.stringMatching(/does not exist/i))
+  })
 })

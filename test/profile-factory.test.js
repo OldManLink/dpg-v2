@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { createDefaultProfile } from '../src/profile-factory.js'
+import {createDefaultProfile, DEFAULT_REQUIRE, DEFAULT_SYMBOL_SET} from '../src/profile-factory.js'
 
 describe('createDefaultProfile', () => {
   it('creates a valid default profile', () => {
@@ -11,8 +11,8 @@ describe('createDefaultProfile', () => {
       service: 'github-main',
       counter: 0,
       length: 20,
-      require: ['lower', 'upper', 'digit', 'symbol'],
-      symbolSet: '!@#',
+      require: DEFAULT_REQUIRE,
+      symbolSet: DEFAULT_SYMBOL_SET,
       createdAt: '2026-04-14T12:00:00.000Z',
       updatedAt: '2026-04-14T12:00:00.000Z'
     })

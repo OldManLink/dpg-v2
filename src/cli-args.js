@@ -85,7 +85,7 @@ export function usageText() {
     '',
     'Options:',
     '  -p, --profile <label>   Generate password from existing profile',
-    '  -n, --new <label>       Generate new profile with default values',
+    '  -n, --new <label>       Create new profile with default values',
     '  -b, --bump <label>      Generate password using counter + 1',
     '      --save              Persist changes made by --bump',
     '      --show              Print generated password to stdout',

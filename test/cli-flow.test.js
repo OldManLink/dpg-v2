@@ -3,6 +3,10 @@ import { runCli } from '../src/cli-runner.js'
 import {DEFAULT_PROFILE, makeProfile} from './fixtures/profiles.js'
 import { makeCliArgs } from './fixtures/cli.js'
 import {createDefaultProfile} from "../src/profile-factory.js";
+import fs from 'node:fs/promises'
+import path from "node:path";
+import {tmpdir} from "node:os";
+import {loadAllProfiles, saveProfiles} from "../src/profiles-file.js";
 
 describe('runCli', () => {
   it('loads profile, prompts for password, generates, copies, and prints success', async () => {
@@ -71,12 +75,16 @@ describe('runCli', () => {
     expect(exitCode).toBe(0)
 
     if (!savedProfiles) throw new Error('not saved')
+    expect(savedProfiles).toHaveLength(1)
+
     /** @type {import('../src/profiles-file.js').Profile} */
     const savedProfile = savedProfiles[0]
-
-    expect(savedProfiles).toHaveLength(1)
     expect(savedProfile.label).toBe('github-main')
-    expect(stdout.write).toHaveBeenCalledWith("Created profile 'github-main'\n")
+    expect(savedProfile.service).toBe('github-main')
+    expect(savedProfile.counter).toBe(0)
+    expect(savedProfile.require.length).toBe(4)
+    expect(savedProfile.length).toBe(20)
+    expect(stdout.write).toHaveBeenCalledWith("Created profile: 'github-main'\n")
   })
 
   it('fails when creating a duplicate profile', async () => {
@@ -257,5 +265,32 @@ describe('runCli', () => {
 
     expect(exitCode).toBe(0)
     expect(stdout.write).toHaveBeenCalledWith(expect.stringMatching(/no profiles/i))
+  })
+
+  it('creates a profile when the profiles file does not exist', async () => {
+    const dir = await fs.mkdtemp(path.join(tmpdir(), 'dpg-'))
+    const profilesPath = path.join(dir, 'profiles.json')
+
+    const stdout = { write: vi.fn() }
+    const stderr = { write: vi.fn() }
+
+    const exitCode = await runCli(
+      makeCliArgs({ create: 'github-main' }),
+      {
+        loadAllProfiles: () => loadAllProfiles({ profilesPath }),
+        saveProfiles: profiles => saveProfiles(profiles, { profilesPath }),
+        stdout,
+        stderr
+      }
+    )
+
+    expect(exitCode).toBe(0)
+    expect(stdout.write).toHaveBeenCalledWith("Created profile: 'github-main'\n")
+    expect(stderr.write).not.toHaveBeenCalled()
+
+    const saved = JSON.parse(await fs.readFile(profilesPath, 'utf8'))
+    expect(saved).toHaveLength(1)
+    expect(saved[0].label).toBe('github-main')
+    expect(saved[0].counter).toBe(0)
   })
 })

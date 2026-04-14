@@ -113,14 +113,14 @@ export async function runCli(args, deps = {}) {
       const all = await loadAll()
 
       if (all.some(p => p.label === args.create)) {
-        stderr.write(`Profile '${args.create}' already exists\n`)
+        stderr.write(`Profile already exists: '${args.create}'\n`)
         return 1
       }
 
       const profile = createDefaultProfile(args.create)
       await save([...all, profile])
 
-      stdout.write(`Created profile '${args.create}'\n`)
+      stdout.write(`Created profile: '${args.create}'\n`)
       return 0
     }
 

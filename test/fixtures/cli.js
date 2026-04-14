@@ -11,6 +11,7 @@ export function makeCliArgs(overrides = {}) {
     bump: null,
     save: false,
     create: null,
+    deleteLabel: null,
     ...overrides
   }
 }

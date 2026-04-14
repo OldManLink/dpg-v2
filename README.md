@@ -179,6 +179,14 @@ Rules:
 - label may contain only letters, digits, dot, underscore, and hyphen
 - spaces are not allowed
 
+### Delete a profile
+
+    dpg -D github-main
+
+Prompts for confirmation before deleting the profile.
+
+Only an explicit `y` confirms deletion. Any other response cancels it.
+
 ### List profiles
 
     dpg --list

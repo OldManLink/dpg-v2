@@ -9,7 +9,8 @@ describe('parseArgs', () => {
       help: false,
       bump: null,
       list: false,
-      save: false
+      save: false,
+      create: null
     })
   })
 
@@ -20,8 +21,37 @@ describe('parseArgs', () => {
       help: false,
       bump: null,
       list: false,
-      save: false
+      save: false,
+      create: null
     })
+  })
+
+  it('parses -n <label>', () => {
+    expect(parseArgs(['-n', 'github-main'])).toEqual({
+      profileLabel: null,
+      show: false,
+      help: false,
+      list: false,
+      bump: null,
+      save: false,
+      create: 'github-main'
+    })
+  })
+
+  it('parses --new <label>', () => {
+    expect(parseArgs(['--new', 'github-main'])).toEqual({
+      profileLabel: null,
+      show: false,
+      help: false,
+      list: false,
+      bump: null,
+      save: false,
+      create: 'github-main'
+    })
+  })
+
+  it('throws if label is missing after -n/--new', () => {
+    expect(() => parseArgs(['-n'])).toThrow(/label/i)
   })
 
   it('parses --help', () => {
@@ -31,7 +61,8 @@ describe('parseArgs', () => {
       help: true,
       bump: null,
       list: false,
-      save: false
+      save: false,
+      create: null
     })
   })
 
@@ -42,7 +73,8 @@ describe('parseArgs', () => {
       help: false,
       list: false,
       bump: 'github-main',
-      save: false
+      save: false,
+      create: null
     })
   })
 
@@ -53,7 +85,8 @@ describe('parseArgs', () => {
       help: false,
       list: false,
       bump: 'github-main',
-      save: true
+      save: true,
+      create: null
     })
   })
 

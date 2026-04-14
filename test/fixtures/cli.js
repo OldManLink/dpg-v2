@@ -10,6 +10,7 @@ export function makeCliArgs(overrides = {}) {
     list: false,
     bump: null,
     save: false,
+    create: null,
     ...overrides
   }
 }

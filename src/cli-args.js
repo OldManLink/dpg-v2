@@ -5,7 +5,8 @@
  *   help: boolean,
  *   list: boolean,
  *   bump: string | null,
- *   save: boolean
+ *   save: boolean,
+ *   create: string | null
  * }} CliArgs
  */
 
@@ -17,7 +18,8 @@
  *   help: boolean,
  *   list: boolean,
  *   bump: string | null,
- *   save: boolean
+ *   save: boolean,
+ *   create: string | null
  * }}
  */
 export function parseArgs(argv) {
@@ -27,6 +29,7 @@ export function parseArgs(argv) {
   let list = false
   let bump = null
   let save = false
+  let create = null
 
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i]
@@ -37,6 +40,12 @@ export function parseArgs(argv) {
         throw new Error('Missing profile label after -p/--profile')
       }
       profileLabel = next
+    } else if (arg === '-n' || arg === '--new') {
+      const next = argv[++i]
+      if (!next) {
+        throw new Error('Missing profile label after -n/--new')
+      }
+      create = next
     } else if (arg === '-b' || arg === '--bump') {
       const next = argv[++i]
       if (!next) {
@@ -56,7 +65,7 @@ export function parseArgs(argv) {
     }
   }
 
-  return { profileLabel, show, help, list, bump, save }
+  return { profileLabel, show, help, list, bump, save, create }
 }
 
 export function usageText() {
@@ -65,6 +74,8 @@ export function usageText() {
     '  dpg -p <label>',
     '  dpg --profile <label>',
     '  dpg -p <label> --show',
+    '  dpg -n <label>',
+    '  dpg --new <label>',
     '  dpg --list',
     '  dpg -b <label>',
     '  dpg -b <label> --show',
@@ -74,6 +85,7 @@ export function usageText() {
     '',
     'Options:',
     '  -p, --profile <label>   Generate password from existing profile',
+    '  -n, --new <label>       Generate new profile with default values',
     '  -b, --bump <label>      Generate password using counter + 1',
     '      --save              Persist changes made by --bump',
     '      --show              Print generated password to stdout',

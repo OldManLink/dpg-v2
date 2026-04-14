@@ -1,4 +1,5 @@
 import {loadProfileByLabel, saveProfiles, loadAllProfiles} from './profiles-file.js'
+import { createDefaultProfile } from './profile-factory.js'
 import {promptForMasterPassword} from './prompt.js'
 import {generatePassword} from './generate.js'
 import {copyToClipboard} from './clipboard.js'
@@ -39,8 +40,8 @@ export async function runCli(args, deps = {}) {
     return 0
   }
 
-  if (!args.profileLabel && !args.bump && !args.list) {
-    stderr.write('No command specified. Use -p <label>, -b <label>, or --list. See -h for help.\n')
+  if (!args.profileLabel && !args.bump && !args.create && !args.list) {
+    stderr.write('No command specified. Use -p <label>, -b <label>, -n <label>, or --list. See -h for help.\n')
     return 1
   }
 
@@ -105,6 +106,21 @@ export async function runCli(args, deps = {}) {
         stdout.write(`Counter: ${oldCounter} → ${newCounter}\n`)
       }
 
+      return 0
+    }
+
+    if (args.create) {
+      const all = await loadAll()
+
+      if (all.some(p => p.label === args.create)) {
+        stderr.write(`Profile '${args.create}' already exists\n`)
+        return 1
+      }
+
+      const profile = createDefaultProfile(args.create)
+      await save([...all, profile])
+
+      stdout.write(`Created profile '${args.create}'\n`)
       return 0
     }
 

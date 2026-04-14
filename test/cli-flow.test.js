@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest'
 import { runCli } from '../src/cli-runner.js'
-import { DEFAULT_PROFILE } from './fixtures/profiles.js'
+import {DEFAULT_PROFILE, makeProfile} from './fixtures/profiles.js'
 import { makeCliArgs } from './fixtures/cli.js'
 
 describe('runCli', () => {
@@ -85,5 +85,115 @@ describe('runCli', () => {
 
     expect(exitCode).toBe(1)
     expect(stderr.write).toHaveBeenCalledWith(expect.stringMatching(/profile not found/i))
+  })
+
+  it('does not report saved if save fails', async () => {
+    const profile = makeProfile({ label: 'github', counter: 5 })
+
+    const stdout = { write: vi.fn() }
+
+    const exitCode = await runCli(
+      makeCliArgs({ bump: 'github', save: true }),
+      {
+        loadProfileByLabel: async () => profile,
+        loadAllProfiles: async () => [profile],
+        saveProfiles: async () => {
+          throw new Error('disk full')
+        },
+        generatePassword: async () => 'pw',
+        copyToClipboard: async () => {},
+        promptForMasterPassword: async () => 'master',
+        stdout,
+        stderr: { write: vi.fn() }
+      }
+    )
+
+    expect(exitCode).toBe(1)
+
+    const output = stdout.write.mock.calls.map(c => c[0]).join('')
+    expect(output).not.toMatch(/\(saved\)/)
+  })
+
+  it('updates updatedAt when saved', async () => {
+    const profile = makeProfile({
+      label: 'github',
+      counter: 5,
+      updatedAt: '2020-01-01T00:00:00.000Z'
+    })
+
+    /** @type {import('../src/profiles-file.js').Profile[] | null} */
+    let savedProfiles = null
+
+    await runCli(
+      makeCliArgs({ bump: 'github', save: true }),
+      {
+        loadProfileByLabel: async () => profile,
+        loadAllProfiles: async () => [profile],
+        saveProfiles: async p => { savedProfiles = p },
+        generatePassword: async () => 'pw',
+        copyToClipboard: async () => {},
+        promptForMasterPassword: async () => 'master',
+        stdout: { write: () => {} },
+        stderr: { write: () => {} }
+      }
+    )
+
+    if (!savedProfiles) throw new Error('not saved')
+
+    /** @type {import('../src/profiles-file.js').Profile} */
+    const savedProfile = savedProfiles[0]
+
+    expect(savedProfile.updatedAt).not.toBe(profile.updatedAt)
+  })
+
+  it('fails if profile does not exist', async () => {
+    const stderr = { write: vi.fn() }
+
+    const exitCode = await runCli(
+      makeCliArgs({ bump: 'nope' }),
+      {
+        loadProfileByLabel: async () => {
+          throw new Error('Profile not found: nope')
+        },
+        stderr,
+        stdout: { write: () => {} }
+      }
+    )
+
+    expect(exitCode).toBe(1)
+    expect(stderr.write).toHaveBeenCalledWith(expect.stringMatching(/not found/i))
+  })
+
+  it('fails when no command is specified', async () => {
+    const stderr = { write: vi.fn() }
+
+    const exitCode = await runCli(
+      makeCliArgs(), // all defaults → no profile, no bump, no list
+      {
+        stderr,
+        stdout: { write: vi.fn() }
+      }
+    )
+
+    expect(exitCode).toBe(1)
+    expect(stderr.write).toHaveBeenCalledWith(
+      expect.stringMatching(/no command/i)
+    )
+  })
+
+  it('treats missing profiles file as empty list', async () => {
+    const stdout = { write: vi.fn() }
+
+    const exitCode = await runCli(
+      makeCliArgs({ list: true }),
+      {
+        loadAllProfiles: async () => [],
+        stdout,
+        stderr: { write: vi.fn() }
+      }
+    )
+
+    expect(exitCode).toBe(0)
+    expect(stdout.write).toHaveBeenCalledWith(expect.stringMatching(/no profiles/i))
   })
 })

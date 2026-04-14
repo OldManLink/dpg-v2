@@ -1,4 +1,15 @@
 /**
+ * @typedef {{
+ *   profileLabel: string | null,
+ *   show: boolean,
+ *   help: boolean,
+ *   list: boolean,
+ *   bump: string | null,
+ *   save: boolean
+ * }} CliArgs
+ */
+
+/**
  * @param {string[]} argv
  * @returns {{
  *   profileLabel: string | null,

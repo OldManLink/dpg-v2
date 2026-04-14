@@ -3,6 +3,22 @@ import path from 'node:path'
 import fs from 'node:fs/promises'
 
 /**
+ * @typedef {{
+ *   version: string,
+ *   label: string,
+ *   service: string,
+ *   account?: string,
+ *   counter: number,
+ *   length: number,
+ *   require: string[],
+ *   symbolSet?: string,
+ *   notes?: string,
+ *   createdAt?: string,
+ *   updatedAt?: string
+ * }} Profile
+ */
+
+/**
  * @param {{ platform?: string, homeDir?: string }=} options
  * @returns {string}
  */
@@ -65,7 +81,17 @@ export async function loadProfileByLabel(label, options = {}) {
 
 export async function loadAllProfiles(options = {}) {
   const profilesPath = options.profilesPath ?? resolveProfilesPath()
-  const text = await fs.readFile(profilesPath, 'utf8')
+
+  let text
+  try {
+    text = await fs.readFile(profilesPath, 'utf8')
+  } catch (err) {
+    if (err && err.code === 'ENOENT') {
+      return []
+    }
+    throw err
+  }
+
   const parsed = JSON.parse(text)
 
   if (!Array.isArray(parsed)) {
@@ -75,6 +101,11 @@ export async function loadAllProfiles(options = {}) {
   return parsed
 }
 
+/**
+ * @param {Profile[]} profiles
+ * @param {{ profilesPath?: string }=} options
+ * @returns {Promise<void>}
+ */
 export async function saveProfiles(profiles, options = {}) {
   const profilesPath = options.profilesPath ?? resolveProfilesPath()
   const tmpPath = profilesPath + '.tmp'

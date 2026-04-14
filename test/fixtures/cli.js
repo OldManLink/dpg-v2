@@ -1,3 +1,7 @@
+/**
+ * @param {Partial<import('../../src/cli-args.js').CliArgs>=} overrides
+ * @returns {import('../../src/cli-args.js').CliArgs}
+ */
 export function makeCliArgs(overrides = {}) {
   return {
     profileLabel: null,

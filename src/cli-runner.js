@@ -18,7 +18,7 @@ import {usageText} from './cli-args.js'
  */
 
 /**
- * @param {{ profileLabel: string | null, show: boolean, help: boolean, list: boolean , bump: string | null , save: boolean }} args
+ * @param {import('./cli-args.js').CliArgs} args
  * @param {CliDeps=} deps
  * @returns {Promise<number>}
  */
@@ -39,65 +39,75 @@ export async function runCli(args, deps = {}) {
     return 0
   }
 
-  if (args.list) {
-    const profiles = await loadAll()
-
-    if (profiles.length === 0) {
-      stdout.write('No profiles found.\n')
-      return 0
-    }
-
-    const sorted = [...profiles].sort((a, b) =>
-      a.label.localeCompare(b.label)
-    )
-
-    for (const p of sorted) {
-      stdout.write(`${p.label} (${p.service}) [counter=${p.counter}]\n`)
-    }
-
-    return 0
-  }
-
-  if (args.bump) {
-    const profile = await load(args.bump)
-
-    const oldCounter = profile.counter
-    const newCounter = oldCounter + 1
-
-    const updatedProfile = {
-      ...profile,
-      counter: newCounter
-    }
-
-    const masterPassword = await prompt()
-    const password = await generate(masterPassword, updatedProfile)
-
-    await copy(password)
-
-    const savedSuffix = args.save ? ' (saved)' : ''
-    stdout.write(`Counter: ${oldCounter} → ${newCounter}${savedSuffix}\n`)
-
-    if (args.show) {
-      stdout.write(password + '\n')
-    }
-
-    if (args.save) {
-      const all = await loadAll()
-      const updated = all.map(p =>
-        p.label === profile.label ? updatedProfile : p
-      )
-      await save(updated)
-    }
-
-    return 0
-  }
-
-  if (!args.profileLabel) {
-    stderr.write('A profile label is required. Use -p <label>.\n')
+  if (!args.profileLabel && !args.bump && !args.list) {
+    stderr.write('No command specified. Use -p <label>, -b <label>, or --list. See -h for help.\n')
     return 1
   }
 
   try {
+    if (args.list) {
+      const profiles = await loadAll()
+
+      if (profiles.length === 0) {
+        stdout.write('No profiles found.\n')
+        return 0
+      }
+
+      const sorted = [...profiles].sort((a, b) =>
+        a.label.localeCompare(b.label)
+      )
+
+      for (const p of sorted) {
+        stdout.write(`${p.label} (${p.service}) [counter=${p.counter}]\n`)
+      }
+
+      return 0
+    }
+
+    if (args.bump) {
+      const profile = await load(args.bump)
+
+      const oldCounter = profile.counter
+      const newCounter = oldCounter + 1
+
+      const updatedProfile = {
+        ...profile,
+        counter: newCounter
+      }
+
+      const masterPassword = await prompt()
+      const password = await generate(masterPassword, updatedProfile)
+
+      await copy(password)
+
+      if (args.show) {
+        stdout.write(password + '\n')
+      }
+
+      if (args.save) {
+        const now = new Date().toISOString()
+
+        const updatedProfile = {
+          ...profile,
+          counter: newCounter,
+          updatedAt: now
+        }
+
+        const all = await loadAll()
+        const updated = all.map(p =>
+          p.label === profile.label ? updatedProfile : p
+        )
+
+        await save(updated)
+
+        stdout.write(`Counter: ${oldCounter} → ${newCounter} (saved)\n`)
+      } else {
+        stdout.write(`Counter: ${oldCounter} → ${newCounter}\n`)
+      }
+
+      return 0
+    }
+
     const profile = await load(args.profileLabel)
     const masterPassword = await prompt()
     const password = await generate(masterPassword, profile)
@@ -112,6 +122,7 @@ export async function runCli(args, deps = {}) {
     }
 
     return 0
+
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error)
     stderr.write(message + '\n')

@@ -168,6 +168,17 @@ This will:
 
 This also prints the generated password to stdout.
 
+### Create a new profile
+
+    dpg --new github-work
+
+Creates a new profile with sensible defaults.
+
+Rules:
+- label must be unique
+- label may contain only letters, digits, dot, underscore, and hyphen
+- spaces are not allowed
+
 ### List profiles
 
     dpg --list

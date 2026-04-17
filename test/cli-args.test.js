@@ -11,7 +11,8 @@ describe('parseArgs', () => {
       list: false,
       save: false,
       create: null,
-      deleteLabel: null
+      deleteLabel: null,
+      showProfileLabel: null
     })
   })
 
@@ -24,8 +25,13 @@ describe('parseArgs', () => {
       list: false,
       save: false,
       create: null,
-      deleteLabel: null
+      deleteLabel: null,
+      showProfileLabel: null
     })
+  })
+
+  it('throws if profile label is missing', () => {
+    expect(() => parseArgs(['-p'])).toThrow(/profile label/i)
   })
 
   it('parses -n <label>', () => {
@@ -37,7 +43,8 @@ describe('parseArgs', () => {
       bump: null,
       save: false,
       create: 'github-main',
-      deleteLabel: null
+      deleteLabel: null,
+      showProfileLabel: null
     })
   })
 
@@ -50,7 +57,8 @@ describe('parseArgs', () => {
       bump: null,
       save: false,
       create: 'github-main',
-      deleteLabel: null
+      deleteLabel: null,
+      showProfileLabel: null
     })
   })
 
@@ -67,7 +75,8 @@ describe('parseArgs', () => {
       bump: null,
       save: false,
       create: null,
-      deleteLabel: 'github-main'
+      deleteLabel: 'github-main',
+      showProfileLabel: null
     })
   })
 
@@ -80,25 +89,13 @@ describe('parseArgs', () => {
       bump: null,
       save: false,
       create: null,
-      deleteLabel: 'github-main'
+      deleteLabel: 'github-main',
+      showProfileLabel: null
     })
   })
 
   it('throws if label is missing after -D/--delete', () => {
     expect(() => parseArgs(['-D'])).toThrow(/label/i)
-  })
-
-  it('parses --help', () => {
-    expect(parseArgs(['--help'])).toEqual({
-      profileLabel: null,
-      show: false,
-      help: true,
-      bump: null,
-      list: false,
-      save: false,
-      create: null,
-      deleteLabel: null
-    })
   })
 
   it('parses -b <label>', () => {
@@ -110,7 +107,8 @@ describe('parseArgs', () => {
       bump: 'github-main',
       save: false,
       create: null,
-      deleteLabel: null
+      deleteLabel: null,
+      showProfileLabel: null
     })
   })
 
@@ -123,12 +121,41 @@ describe('parseArgs', () => {
       bump: 'github-main',
       save: true,
       create: null,
-      deleteLabel: null
+      deleteLabel: null,
+      showProfileLabel: null
     })
   })
 
-  it('throws if profile label is missing', () => {
-    expect(() => parseArgs(['-p'])).toThrow(/profile label/i)
+  it('parses --show-profile <label>', () => {
+    expect(parseArgs(['--show-profile', 'github-main'])).toEqual({
+      profileLabel: null,
+      show: false,
+      help: false,
+      list: false,
+      bump: null,
+      save: false,
+      create: null,
+      deleteLabel: null,
+      showProfileLabel: 'github-main'
+    })
+  })
+
+  it('throws if label is missing after --show-profile', () => {
+    expect(() => parseArgs(['--show-profile'])).toThrow(/label/i)
+  })
+
+  it('parses --help', () => {
+    expect(parseArgs(['--help'])).toEqual({
+      profileLabel: null,
+      show: false,
+      help: true,
+      bump: null,
+      list: false,
+      save: false,
+      create: null,
+      deleteLabel: null,
+      showProfileLabel: null
+    })
   })
 
   it('throws on unknown argument', () => {

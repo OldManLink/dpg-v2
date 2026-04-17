@@ -1,10 +1,11 @@
-import {loadProfileByLabel, saveProfiles, loadAllProfiles} from './profiles-file.js'
+import { loadProfileByLabel, saveProfiles, loadAllProfiles } from './profiles-file.js'
 import { createDefaultProfile } from './profile-factory.js'
-import {promptForMasterPassword} from './prompt.js'
-import {generatePassword} from './generate.js'
-import {copyToClipboard} from './clipboard.js'
-import {usageText} from './cli-args.js'
+import { promptForMasterPassword } from './prompt.js'
+import { generatePassword } from './generate.js'
+import { copyToClipboard } from './clipboard.js'
+import { usageText } from './cli-args.js'
 import { promptForConfirmation } from './confirm.js'
+import { serializeProfilePretty } from './profile-serialization.js'
 
 /**
  * @typedef {{
@@ -43,8 +44,8 @@ export async function runCli(args, deps = {}) {
     return 0
   }
 
-  if (!args.profileLabel && !args.bump && !args.create && !args.deleteLabel && !args.list) {
-    stderr.write('No command specified. Use -p <label>, -b <label>, -n <label>, -D <label>, or --list. See -h for help.\n')
+  if (!args.profileLabel && !args.bump && !args.list && !args.create && !args.deleteLabel && !args.showProfileLabel) {
+    stderr.write('No command specified. Use -p <label>, -b <label>, --list, -n <label>, -D <label>, or --show-profile <label>. See -h for help.\n')
     return 1
   }
 
@@ -149,6 +150,12 @@ export async function runCli(args, deps = {}) {
       await save(remaining)
 
       stdout.write(`Deleted profile: '${args.deleteLabel}'\n`)
+      return 0
+    }
+
+    if (args.showProfileLabel) {
+      const profile = await load(args.showProfileLabel)
+      stdout.write(serializeProfilePretty(profile) + '\n')
       return 0
     }
 

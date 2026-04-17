@@ -8,6 +8,7 @@
  *   save: boolean,
  *   create: string | null,
  *   deleteLabel: string | null
+ *   showProfileLabel: string | null,
  * }} CliArgs
  */
 
@@ -21,7 +22,8 @@
  *   bump: string | null,
  *   save: boolean,
  *   create: string | null,
- *   deleteLabel: string | null
+ *   deleteLabel: string | null,
+ *   showProfileLabel: string | null
  * }}
  */
 export function parseArgs(argv) {
@@ -33,6 +35,7 @@ export function parseArgs(argv) {
   let save = false
   let create = null
   let deleteLabel = null
+  let showProfileLabel = null
 
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i]
@@ -61,6 +64,12 @@ export function parseArgs(argv) {
         throw new Error('Missing profile label after -D/--delete')
       }
       deleteLabel = next
+    } else if (arg === '--show-profile') {
+      const next = argv[++i]
+      if (!next) {
+        throw new Error('Missing profile label after --show-profile')
+      }
+      showProfileLabel = next
     } else if (arg === '--list') {
       list = true
     } else if (arg === '--save') {
@@ -74,7 +83,7 @@ export function parseArgs(argv) {
     }
   }
 
-  return { profileLabel, show, help, list, bump, save, create, deleteLabel }
+  return { profileLabel, show, help, list, bump, save, create, deleteLabel, showProfileLabel }
 }
 
 export function usageText() {

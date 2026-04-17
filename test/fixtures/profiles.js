@@ -9,6 +9,7 @@ export const DEFAULT_PROFILE = {
   length: 20,
   require: ['lower', 'upper', 'digit', 'symbol'],
   symbolSet: '!@#',
+  notes: '',
   createdAt: '2026-04-12T00:00:00.000Z',
   updatedAt: '2026-04-12T00:00:00.000Z'
 }

@@ -416,4 +416,45 @@ describe('runCli', () => {
       expect.stringMatching(/disk full/i)
     )
   })
+
+  it('shows an existing profile as pretty-printed JSON', async () => {
+    const profile = makeProfile({ label: 'github-main', service: 'github.com' })
+    const stdout = { write: vi.fn() }
+
+    const exitCode = await runCli(
+      makeCliArgs({ showProfileLabel: 'github-main' }),
+      {
+        loadProfileByLabel: async () => profile,
+        stdout,
+        stderr: { write: vi.fn() }
+      }
+    )
+
+    expect(exitCode).toBe(0)
+
+    const output = stdout.write.mock.calls.map(c => c[0]).join('')
+    const parsed = JSON.parse(output)
+
+    expect(parsed.label).toBe('github-main')
+    expect(parsed.service).toBe('github.com')
+    expect(output).toContain('\n')
+  })
+
+  it('fails when show-profile target does not exist', async () => {
+    const stderr = { write: vi.fn() }
+
+    const exitCode = await runCli(
+      makeCliArgs({ showProfileLabel: 'missing' }),
+      {
+        loadProfileByLabel: async () => {
+          throw new Error("Profile 'missing' does not exist")
+        },
+        stdout: { write: vi.fn() },
+        stderr
+      }
+    )
+
+    expect(exitCode).toBe(1)
+    expect(stderr.write).toHaveBeenCalledWith(expect.stringMatching(/does not exist/i))
+  })
 })

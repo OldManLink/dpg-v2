@@ -217,6 +217,17 @@ This does the same thing, but also persists the incremented counter back to `pro
 
 This also prints the generated password to stdout.
 
+### Show a profile
+
+    dpg --show-profile github-main
+
+Prints the full profile as pretty-printed JSON.
+
+Useful for:
+- debugging
+- verifying stored fields
+- piping into tools such as `jq`
+
 ### Help
 
     dpg --help

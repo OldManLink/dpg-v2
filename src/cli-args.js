@@ -7,24 +7,14 @@
  *   bump: string | null,
  *   save: boolean,
  *   create: string | null,
- *   deleteLabel: string | null
- *   showProfileLabel: string | null,
+ *   deleteLabel: string | null,
+ *   showProfileLabel: string | null
  * }} CliArgs
  */
 
 /**
  * @param {string[]} argv
- * @returns {{
- *   profileLabel: string | null,
- *   show: boolean,
- *   help: boolean,
- *   list: boolean,
- *   bump: string | null,
- *   save: boolean,
- *   create: string | null,
- *   deleteLabel: string | null,
- *   showProfileLabel: string | null
- * }}
+ * @returns {CliArgs}
  */
 export function parseArgs(argv) {
   let profileLabel = null
@@ -92,25 +82,27 @@ export function usageText() {
     '  dpg -p <label>',
     '  dpg --profile <label>',
     '  dpg -p <label> --show',
-    '  dpg -n <label>',
-    '  dpg --new <label>',
-    '  dpg -D <label>',
-    '  dpg --delete <label>',
     '  dpg --list',
     '  dpg -b <label>',
     '  dpg -b <label> --show',
     '  dpg -b <label> --save',
     '  dpg -b <label> --save --show',
+    '  dpg -n <label>',
+    '  dpg --new <label>',
+    '  dpg -D <label>',
+    '  dpg --delete <label>',
+    '  dpg --show-profile <label>',
     '  dpg --help',
     '',
     'Options:',
-    '  -p, --profile <label>   Generate password from existing profile',
-    '  -n, --new <label>       Create new profile with default values',
-    '  -D, --delete <label>    Delete an existing profile (confirmation required)',
-    '  -b, --bump <label>      Generate password using counter + 1',
-    '      --save              Persist changes made by --bump',
-    '      --show              Print generated password to stdout',
-    '      --list              List available profiles',
-    '  -h, --help              Show this help text'
+    '  -p, --profile <label>       Generate password from existing profile',
+    '  -b, --bump <label>          Generate password using counter + 1',
+    '      --save                  Persist changes made by --bump',
+    '      --show                  Print generated password to stdout',
+    '      --list                  List available profiles',
+    '  -n, --new <label>           Create a new profile with default values',
+    '  -D, --delete <label>        Delete an existing profile (confirmation required)',
+    '      --show-profile <label>  Pretty-print a profile as JSON',
+    '  -h, --help                  Show this help text'
   ].join('\n')
 }

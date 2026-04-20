@@ -1,6 +1,8 @@
+/** @typedef {import('../../src/models.js').CliArgs} CliArgs */
+
 /**
- * @param {Partial<import('../../src/cli-args.js').CliArgs>=} overrides
- * @returns {import('../../src/cli-args.js').CliArgs}
+ * @param {Partial<CliArgs>=} overrides
+ * @returns {CliArgs}
  */
 export function makeCliArgs(overrides = {}) {
   return {

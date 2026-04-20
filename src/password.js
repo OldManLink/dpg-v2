@@ -1,6 +1,7 @@
 import { ByteStream } from './stream.js'
 import { uniformIndex } from './uniform.js'
 import { deterministicShuffle } from './shuffle.js'
+/** @typedef {import('./models.js').PasswordPolicyInput} PasswordPolicyInput */
 
 const LOWER = 'abcdefghijklmnopqrstuvwxyz'
 const UPPER = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
@@ -43,6 +44,11 @@ function pickChar(stream, alphabet) {
   return alphabet[uniformIndex(stream, alphabet.length)]
 }
 
+/**
+ * @param {Uint8Array} siteKey
+ * @param {PasswordPolicyInput} profile
+ * @returns {string}
+ */
 export function generatePasswordFromSiteKey(siteKey, profile) {
   const require = canonicalRequire(profile.require ?? [])
   const length = profile.length

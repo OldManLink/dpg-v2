@@ -6,23 +6,11 @@ import { copyToClipboard } from './clipboard.js'
 import { usageText } from './cli-args.js'
 import { promptForConfirmation } from './confirm.js'
 import { serializeProfilePretty } from './profile-serialization.js'
+/** @typedef {import('./models.js').CliDeps} CliDeps */
+/** @typedef {import('./models.js').CliArgs} CliArgs */
 
 /**
- * @typedef {{
- *   loadProfileByLabel?: (label: string) => Promise<any>,
- *   loadAllProfiles?: () => Promise<any[]>,
- *   saveProfiles?: (profiles: any[]) => Promise<void>,
- *   promptForMasterPassword?: () => Promise<string>,
- *   generatePassword?: (master: string, profile: any) => Promise<string>,
- *   copyToClipboard?: (text: string) => Promise<void>,
- *   promptForConfirmation?: (prompt: string) => Promise<string>,
- *   stdout?: { write: (s: string) => void },
- *   stderr?: { write: (s: string) => void }
- * }} CliDeps
- */
-
-/**
- * @param {import('./cli-args.js').CliArgs} args
+ * @param {CliArgs} args
  * @param {CliDeps=} deps
  * @returns {Promise<number>}
  */

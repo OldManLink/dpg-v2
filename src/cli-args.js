@@ -1,16 +1,4 @@
-/**
- * @typedef {{
- *   profileLabel: string | null,
- *   show: boolean,
- *   help: boolean,
- *   list: boolean,
- *   bump: string | null,
- *   save: boolean,
- *   create: string | null,
- *   deleteLabel: string | null,
- *   showProfileLabel: string | null
- * }} CliArgs
- */
+/** @typedef {import('./models.js').CliArgs} CliArgs */
 
 /**
  * @param {string[]} argv

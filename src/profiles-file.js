@@ -1,22 +1,7 @@
 import os from 'node:os'
 import path from 'node:path'
 import fs from 'node:fs/promises'
-
-/**
- * @typedef {{
- *   version: string,
- *   label: string,
- *   service: string,
- *   account?: string,
- *   counter: number,
- *   length: number,
- *   require: string[],
- *   symbolSet?: string,
- *   notes?: string,
- *   createdAt?: string,
- *   updatedAt?: string
- * }} Profile
- */
+/** @typedef {import('./models.js').Profile} Profile */
 
 /**
  * @param {{ platform?: string, homeDir?: string }=} options

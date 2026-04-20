@@ -1,13 +1,17 @@
 import { spawn as realSpawn } from 'node:child_process'
 import { accessSync, constants } from 'node:fs'
 import path from 'node:path'
+/** @typedef {import('./models.js').ClipboardChildProcess} ClipboardChildProcess */
+/** @typedef {import('./models.js').ClipboardSpawn} ClipboardSpawn */
+/** @typedef {import('./models.js').ClipboardCommand} ClipboardCommand */
+/** @typedef {import('./models.js').ClipboardEnvironment} ClipboardEnvironment */
+/** @typedef {import('./models.js').ClipboardOptions} ClipboardOptions */
 
 /**
  * @param {string} name
  * @returns {boolean}
  */
 function commandExists(name) {
-  /** @type {string} */
   const pathValue = process.env.PATH ?? ''
   const extensions = process.platform === 'win32'
     ? ['.exe', '.cmd', '.bat', '']
@@ -28,21 +32,8 @@ function commandExists(name) {
 }
 
 /**
- * @typedef {{
- *   stdin: {
- *     end: (text: string) => void
- *   },
- *   on: (event: 'error' | 'close', handler: (value: any) => void) => void
- * }} ClipboardChildProcess
- */
-
-/**
- * @typedef {(command: string, args: string[], options: object) => ClipboardChildProcess} ClipboardSpawn
- */
-
-/**
- * @param {{ platform?: string, hasCommand?: (name: string) => boolean }=} options
- * @returns {{ command: string, args: string[] }}
+ * @param {ClipboardEnvironment=} options
+ * @returns {ClipboardCommand}
  */
 export function getClipboardCommand(options = {}) {
   const platform = options.platform ?? process.platform
@@ -74,16 +65,11 @@ export function getClipboardCommand(options = {}) {
 
 /**
  * @param {string} text
- * @param {{
- *   platform?: string,
- *   hasCommand?: (name: string) => boolean,
- *   spawn?: ClipboardSpawn
- * }=} options
+ * @param {ClipboardOptions=} options
  * @returns {Promise<void>}
  */
 export function copyToClipboard(text, options = {}) {
   const { command, args } = getClipboardCommand(options)
-  /** @type {ClipboardSpawn} */
   const spawn = options.spawn ?? realSpawn
 
   return new Promise((resolve, reject) => {

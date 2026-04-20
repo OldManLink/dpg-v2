@@ -1,5 +1,5 @@
 import { validateProfileLabel } from './profile-validation.js'
-/** @typedef {import('../src/models.js').RequireClass} RequireClass */
+/** @typedef {import('./models.js').RequireClass} RequireClass */
 
 /** @type RequireClass[] */
 export const DEFAULT_REQUIRE = ['lower', 'upper', 'digit', 'symbol']

@@ -1,4 +1,4 @@
-/** @typedef {import('../../src/cli-args.js').CliArgs} CliArgs */
+/** @typedef {import('../../src/models.js').CliArgs} CliArgs */
 
 /**
  * @param {Partial<CliArgs>=} overrides

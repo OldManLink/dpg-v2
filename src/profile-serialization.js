@@ -1,3 +1,4 @@
+/** @typedef {import('./models.js').Profile} Profile */
 const PROFILE_FIELD_ORDER = [
   'version',
   'label',
@@ -13,15 +14,11 @@ const PROFILE_FIELD_ORDER = [
 ]
 
 /**
- * @typedef {import('./profiles-file.js').Profile} Profile
- */
-
-/**
  * @param {Profile} profile
  * @returns {Profile}
  */
 export function normalizeProfileFieldOrder(profile) {
-  /** @type {Record<string, any>} */
+  /** @type Partial<Profile> */
   const ordered = {}
 
   for (const key of PROFILE_FIELD_ORDER) {
@@ -36,7 +33,8 @@ export function normalizeProfileFieldOrder(profile) {
     }
   }
 
-  return /** @type {Profile} */ (ordered)
+  // At this point, all required fields should be present, so cast is safe.
+  return /** @type Profile */ (ordered)
 }
 
 /**

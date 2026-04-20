@@ -1,5 +1,6 @@
 import { describe, it, expect, vi } from 'vitest'
 import { getClipboardCommand, copyToClipboard } from '../src/clipboard.js'
+/** @typedef {import('../src/models.js').ClipboardChildProcess} ClipboardChildProcess */
 
 describe('getClipboardCommand', () => {
   it('uses pbcopy on macOS', () => {
@@ -48,12 +49,9 @@ describe('getClipboardCommand', () => {
 describe('copyToClipboard', () => {
   it('writes to the selected clipboard process stdin', async () => {
     const end = vi.fn()
-    const spawn = vi.fn(() => ({
+    const spawn = vi.fn(() => /** @type {ClipboardChildProcess} */ ({
       stdin: { end },
-      on: (
-        /** @type {'error' | 'close'} */ event,
-        /** @type {(value: any) => void} */ handler
-      ) => {
+      on: (event, handler) => {
         if (event === 'close') handler(0)
       }
     }))

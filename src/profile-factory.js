@@ -1,7 +1,10 @@
 import { validateProfileLabel } from './profile-validation.js'
+/** @typedef {import('../src/models.js').RequireClass} RequireClass */
 
+/** @type RequireClass[] */
 export const DEFAULT_REQUIRE = ['lower', 'upper', 'digit', 'symbol']
 export const DEFAULT_SYMBOL_SET = '!@#'
+
 /**
  * @param {string} label
  * @param {string=} now

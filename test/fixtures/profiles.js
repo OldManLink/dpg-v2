@@ -1,5 +1,6 @@
-/** @typedef {import('../../src/profiles-file.js').Profile} Profile */
-/** @type {Profile} */
+/** @typedef {import('../../src/models.js').Profile} Profile */
+
+/** @type Profile */
 export const DEFAULT_PROFILE = {
   version: 'dpg:v2',
   label: 'github-main',
@@ -15,7 +16,7 @@ export const DEFAULT_PROFILE = {
 }
 
 /**
- * @param {Partial<import('../../src/profiles-file.js').Profile>=} overrides
+ * @param {Partial<Profile>=} overrides
  * @returns {Profile}
  */
 export function makeProfile(overrides = {}) {

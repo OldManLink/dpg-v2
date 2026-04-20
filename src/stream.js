@@ -7,7 +7,7 @@ export class ByteStream {
   constructor(siteKey) {
     this.key = Buffer.from(siteKey)
     this.blockIndex = 0
-    /** @type {number[]} */
+    /** @type number[] */
     this.buffer = []
   }
 

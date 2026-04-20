@@ -7,6 +7,7 @@ import fs from 'node:fs/promises'
 import path from "node:path";
 import {tmpdir} from "node:os";
 import {loadAllProfiles, saveProfiles} from "../src/profiles-file.js";
+/** @typedef {import('../src/models.js').Profile} Profile */
 
 describe('runCli', () => {
   it('loads profile, prompts for password, generates, copies, and prints success', async () => {
@@ -58,7 +59,7 @@ describe('runCli', () => {
 
   it('creates a new profile', async () => {
 
-    /** @type {import('../src/profiles-file.js').Profile[] | null} */
+    /** @type Profile[] */
     let savedProfiles = null
     const stdout = { write: vi.fn() }
 
@@ -76,8 +77,6 @@ describe('runCli', () => {
 
     if (!savedProfiles) throw new Error('not saved')
     expect(savedProfiles).toHaveLength(1)
-
-    /** @type {import('../src/profiles-file.js').Profile} */
     const savedProfile = savedProfiles[0]
     expect(savedProfile.label).toBe('github-main')
     expect(savedProfile.service).toBe('github-main')
@@ -191,7 +190,7 @@ describe('runCli', () => {
       updatedAt: '2020-01-01T00:00:00.000Z'
     })
 
-    /** @type {import('../src/profiles-file.js').Profile[] | null} */
+    /** @type Profile[] */
     let savedProfiles = null
 
     await runCli(
@@ -209,10 +208,7 @@ describe('runCli', () => {
     )
 
     if (!savedProfiles) throw new Error('not saved')
-
-    /** @type {import('../src/profiles-file.js').Profile} */
     const savedProfile = savedProfiles[0]
-
     expect(savedProfile.updatedAt).not.toBe(profile.updatedAt)
   })
 
@@ -300,7 +296,7 @@ describe('runCli', () => {
       makeProfile({ label: 'gitlab-main', service: 'gitlab.com' })
     ]
 
-    /** @type {import('../src/profiles-file.js').Profile[] | null} */
+    /** @type Profile[] */
     let savedProfiles = null
 
     const stdout = { write: vi.fn() }

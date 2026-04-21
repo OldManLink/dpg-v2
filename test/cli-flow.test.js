@@ -260,7 +260,7 @@ describe('runCli', () => {
     )
 
     expect(exitCode).toBe(0)
-    expect(stdout.write).toHaveBeenCalledWith(expect.stringMatching(/no profiles/i))
+    expect(stdout.write).toHaveBeenCalledWith('label  counter\n')
   })
 
   it('creates a profile when the profiles file does not exist', async () => {

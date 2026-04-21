@@ -6,6 +6,7 @@ import { copyToClipboard } from './clipboard.js'
 import { usageText } from './cli-args.js'
 import { promptForConfirmation } from './confirm.js'
 import { serializeProfilePretty } from './profile-serialization.js'
+import { formatProfileList } from './list-formatting.js'
 /** @typedef {import('./models.js').CliDeps} CliDeps */
 /** @typedef {import('./models.js').CliArgs} CliArgs */
 
@@ -37,20 +38,7 @@ export async function runCli(args, deps = {}) {
 
     if (args.list) {
       const profiles = await loadAll()
-
-      if (profiles.length === 0) {
-        stdout.write('No profiles found.\n')
-        return 0
-      }
-
-      const sorted = [...profiles].sort((a, b) =>
-        a.label.localeCompare(b.label)
-      )
-
-      for (const p of sorted) {
-        stdout.write(`${p.label} (${p.service}) [counter=${p.counter}]\n`)
-      }
-
+      stdout.write(formatProfileList(profiles) + '\n')
       return 0
     }
 

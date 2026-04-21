@@ -24,6 +24,7 @@ describe('list command', () => {
     expect(exitCode).toBe(0)
 
     const output = stdout.write.mock.calls.map(c => c[0]).join('')
+    expect(output).toMatch(/label {2}counter/)
     expect(output).toMatch(/alpha/)
     expect(output).toMatch(/zeta/)
     expect(output.indexOf('alpha')).toBeLessThan(output.indexOf('zeta'))
@@ -42,6 +43,6 @@ describe('list command', () => {
     )
 
     expect(exitCode).toBe(0)
-    expect(stdout.write).toHaveBeenCalledWith(expect.stringMatching(/no profiles/i))
+    expect(stdout.write).toHaveBeenCalledWith('label  counter\n')
   })
 })

@@ -519,6 +519,18 @@ describe('runCli', () => {
     expect(exitCode).toBe(1)
   })
 
+  it('fails if --config is used with --list', async () => {
+    const stderr = { write: vi.fn() }
+
+    const exitCode = await runCli(
+      makeCliArgs({ configPresent: true, list: true }),
+      { stdout: { write: vi.fn() }, stderr }
+    )
+
+    expect(exitCode).toBe(1)
+    expect(stderr.write).toHaveBeenCalledWith(expect.stringMatching(/conflicting commands/i))
+  })
+
   it('shows current config as pretty JSON', async () => {
     const stdout = { write: vi.fn() }
 

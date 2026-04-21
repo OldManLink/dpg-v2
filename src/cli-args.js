@@ -52,9 +52,14 @@ export function parseArgs(argv) {
       showProfileLabel = next
     } else if (arg === '-c' || arg === '--config') {
       configPresent = true
-      const next = argv[++i]
+      const next = argv[i + 1]
       if (next && !next.startsWith('-')) {
+        if (!next.includes('=')) {
+          throw new Error('Config update must use key=value syntax')
+        }
+
         configArg = next
+        i++
       }
     } else if (arg === '--list') {
       list = true

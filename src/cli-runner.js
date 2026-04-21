@@ -32,12 +32,9 @@ export async function runCli(args, deps = {}) {
     return 0
   }
 
-  if (!args.profileLabel && !args.bump && !args.list && !args.create && !args.deleteLabel && !args.showProfileLabel) {
-    stderr.write('No command specified. Use -p <label>, -b <label>, --list, -n <label>, -D <label>, or --show-profile <label>. See -h for help.\n')
-    return 1
-  }
-
   try {
+    checkForConflicts(args)
+
     if (args.list) {
       const profiles = await loadAll()
 
@@ -168,3 +165,65 @@ export async function runCli(args, deps = {}) {
     return 1
   }
 }
+
+/**
+ * @param {CliArgs} args
+ * @returns void
+ */
+function checkForConflicts(args) {
+  const primary = []
+  const usedTokens = []
+
+  if (args.profileLabel) {
+    primary.push('profile')
+    usedTokens.push('-p')
+  }
+
+  if (args.list) {
+    primary.push('list')
+    usedTokens.push('-l')
+  }
+
+  if (args.bump) {
+    primary.push('bump')
+    usedTokens.push('-b')
+  }
+
+  if (args.create) {
+    primary.push('create')
+    usedTokens.push('-n')
+  }
+
+  if (args.deleteLabel) {
+    primary.push('delete')
+    usedTokens.push('-D')
+  }
+
+  if (args.showProfileLabel) {
+    primary.push('show-profile')
+    usedTokens.push('show-profile')
+  }
+
+  if (args.save && !args.bump) {
+    throw new Error('--save is only valid with --bump')
+  }
+
+  if (args.show && !(args.profileLabel || args.bump)) {
+    throw new Error('--show is only valid with --profile or --bump')
+  }
+
+  if (args.show && args.list) {
+    throw new Error('--show cannot be used with --list')
+  }
+
+  if (primary.length === 0) {
+    throw new Error('No command specified. See -h for help.')
+  }
+
+  if (primary.length > 1) {
+    throw new Error(
+      `Conflicting commands: ${usedTokens.join(', ')} — specify only one primary action`
+    )
+  }
+}
+

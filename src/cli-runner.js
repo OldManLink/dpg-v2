@@ -175,33 +175,33 @@ function checkForConflicts(args) {
   const usedTokens = []
 
   if (args.profileLabel) {
-    primary.push('--profile')
+    primary.push('profile')
     usedTokens.push('-p')
   }
 
   if (args.list) {
-    primary.push('--list')
+    primary.push('list')
     usedTokens.push('-l')
   }
 
   if (args.bump) {
-    primary.push('--bump')
+    primary.push('bump')
     usedTokens.push('-b')
   }
 
   if (args.create) {
-    primary.push('--create')
+    primary.push('create')
     usedTokens.push('-n')
   }
 
   if (args.deleteLabel) {
-    primary.push('--delete')
+    primary.push('delete')
     usedTokens.push('-D')
   }
 
   if (args.showProfileLabel) {
-    primary.push('--show-profile')
-    usedTokens.push('show-profile')
+    primary.push('show-profile')
+    usedTokens.push('--show-profile')
   }
 
   if (primary.length === 0) {

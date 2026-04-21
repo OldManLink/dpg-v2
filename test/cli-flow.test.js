@@ -476,7 +476,7 @@ describe('runCli', () => {
     const stderr = { write: vi.fn() }
 
     const exitCode = await runCli(
-      makeCliArgs({ show: true }),
+      makeCliArgs({ deleteLabel: 'missing', show: true }),
       { stdout: { write: vi.fn() }, stderr }
     )
 
@@ -488,7 +488,7 @@ describe('runCli', () => {
     const stderr = { write: vi.fn() }
 
     const exitCode = await runCli(
-      makeCliArgs({ save: true }),
+      makeCliArgs({ profileLabel: 'missing', save: true }),
       { stdout: { write: vi.fn() }, stderr }
     )
 

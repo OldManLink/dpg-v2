@@ -30,10 +30,6 @@ describe('parseArgs', () => {
     })
   })
 
-  it('throws if profile label is missing', () => {
-    expect(() => parseArgs(['-p'])).toThrow(/profile label/i)
-  })
-
   it('parses -n <label>', () => {
     expect(parseArgs(['-n', 'github-main'])).toEqual({
       profileLabel: null,
@@ -62,10 +58,6 @@ describe('parseArgs', () => {
     })
   })
 
-  it('throws if label is missing after -n/--new', () => {
-    expect(() => parseArgs(['-n'])).toThrow(/label/i)
-  })
-
   it('parses -D <label>', () => {
     expect(parseArgs(['-D', 'github-main'])).toEqual({
       profileLabel: null,
@@ -92,10 +84,6 @@ describe('parseArgs', () => {
       deleteLabel: 'github-main',
       showProfileLabel: null
     })
-  })
-
-  it('throws if label is missing after -D/--delete', () => {
-    expect(() => parseArgs(['-D'])).toThrow(/label/i)
   })
 
   it('parses -b <label>', () => {
@@ -140,10 +128,6 @@ describe('parseArgs', () => {
     })
   })
 
-  it('throws if label is missing after --show-profile', () => {
-    expect(() => parseArgs(['--show-profile'])).toThrow(/label/i)
-  })
-
   it('parses --help', () => {
     expect(parseArgs(['--help'])).toEqual({
       profileLabel: null,
@@ -158,7 +142,35 @@ describe('parseArgs', () => {
     })
   })
 
-  it('throws on unknown argument', () => {
-    expect(() => parseArgs(['--wat'])).toThrow(/unknown argument/i)
+  it('throws if profile label is missing after -p/--profile', () => {
+    expect(() => parseArgs(['-p'])).toThrow(/missing profile label/i)
+    expect(() => parseArgs(['--profile'])).toThrow(/missing profile label/i)
+  })
+
+  it('throws if label is missing after -b/--bump', () => {
+    expect(() => parseArgs(['-b'])).toThrow(/missing/i)
+    expect(() => parseArgs(['--bump'])).toThrow(/missing/i)
+  })
+
+  it('throws if label is missing after -n/--new', () => {
+    expect(() => parseArgs(['-n'])).toThrow(/missing profile label/i)
+    expect(() => parseArgs(['--new'])).toThrow(/missing profile label/i)
+  })
+
+  it('throws if label is missing after -D/--delete', () => {
+    expect(() => parseArgs(['-D'])).toThrow(/missing profile label/i)
+    expect(() => parseArgs(['--delete'])).toThrow(/missing profile label/i)
+  })
+
+  it('throws if label is missing after --show-profile', () => {
+    expect(() => parseArgs(['--show-profile'])).toThrow(/missing profile label/i)
+  })
+
+  it('throws on unknown long flag', () => {
+    expect(() => parseArgs(['--shwo'])).toThrow(/unknown/i)
+  })
+
+  it('throws on unknown short flag', () => {
+    expect(() => parseArgs(['-z'])).toThrow(/unknown/i)
   })
 })

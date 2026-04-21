@@ -212,7 +212,7 @@ describe('runCli', () => {
     expect(savedProfile.updatedAt).not.toBe(profile.updatedAt)
   })
 
-  it('fails if profile does not exist', async () => {
+  it('fails to bump if profile does not exist', async () => {
     const stderr = { write: vi.fn() }
 
     const exitCode = await runCli(
@@ -436,21 +436,85 @@ describe('runCli', () => {
     expect(output).toContain('\n')
   })
 
-  it('fails when show-profile target does not exist', async () => {
+  it('fails when --show-profile target does not exist', async () => {
     const stderr = { write: vi.fn() }
 
     const exitCode = await runCli(
-      makeCliArgs({ showProfileLabel: 'missing' }),
+      makeCliArgs({ showProfileLabel: 'nope' }),
       {
         loadProfileByLabel: async () => {
-          throw new Error("Profile 'missing' does not exist")
+          throw new Error("Profile 'nope' does not exist")
         },
         stdout: { write: vi.fn() },
         stderr
       }
     )
 
-    expect(exitCode).toBe(1)
     expect(stderr.write).toHaveBeenCalledWith(expect.stringMatching(/does not exist/i))
+    expect(exitCode).toBe(1)
+  })
+
+  it('fails if multiple primary commands are used', async () => {
+    const stderr = { write: vi.fn() }
+
+    const exitCode = await runCli(
+      makeCliArgs({
+        create: 'a',
+        deleteLabel: 'b',
+        bump: 'c'
+      }),
+      { stdout: { write: vi.fn() }, stderr }
+    )
+
+    expect(exitCode).toBe(1)
+    expect(stderr.write).toHaveBeenCalledWith(
+      expect.stringMatching(/conflicting commands/i)
+    )
+  })
+
+  it('fails if --show is used without a valid command', async () => {
+    const stderr = { write: vi.fn() }
+
+    const exitCode = await runCli(
+      makeCliArgs({ deleteLabel: 'missing', show: true }),
+      { stdout: { write: vi.fn() }, stderr }
+    )
+
+    expect(exitCode).toBe(1)
+    expect(stderr.write).toHaveBeenCalledWith(expect.stringMatching(/show/i))
+  })
+
+  it('fails if --save is used without --bump', async () => {
+    const stderr = { write: vi.fn() }
+
+    const exitCode = await runCli(
+      makeCliArgs({ profileLabel: 'missing', save: true }),
+      { stdout: { write: vi.fn() }, stderr }
+    )
+
+    expect(exitCode).toBe(1)
+    expect(stderr.write).toHaveBeenCalledWith(expect.stringMatching(/save/i))
+  })
+
+  it('fails if --save is used with --profile', async () => {
+    const stderr = { write: vi.fn() }
+
+    const exitCode = await runCli(
+      makeCliArgs({ profileLabel: 'x', save: true }),
+      { stdout: { write: vi.fn() }, stderr }
+    )
+
+    expect(exitCode).toBe(1)
+  })
+
+  it('fails if --show is used with --list', async () => {
+    const stderr = { write: vi.fn() }
+
+    const exitCode = await runCli(
+      makeCliArgs({ list: true, show: true }),
+      { stdout: { write: vi.fn() }, stderr }
+    )
+
+    expect(exitCode).toBe(1)
   })
 })

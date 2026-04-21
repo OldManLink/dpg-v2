@@ -1,12 +1,18 @@
 import { ByteStream } from './stream.js'
 import { uniformIndex } from './uniform.js'
 import { deterministicShuffle } from './shuffle.js'
-/** @typedef {import('./models.js').PasswordPolicyInput} PasswordPolicyInput */
+/** @typedef {import('./models.js').Profile} Profile */
+/** @typedef {import('./models.js').RequireClass} RequireClass */
 
 const LOWER = 'abcdefghijklmnopqrstuvwxyz'
 const UPPER = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
 const DIGIT = '0123456789'
 
+/**
+ * @param {string} name
+ * @param {string} symbolSet
+ * @returns {string}
+ */
 function getClassAlphabet(name, symbolSet) {
   switch (name) {
     case 'lower':
@@ -22,7 +28,12 @@ function getClassAlphabet(name, symbolSet) {
   }
 }
 
+/**
+ * @param {RequireClass[]} require
+ * @returns {RequireClass[]}
+ */
 function canonicalRequire(require) {
+  /** @type RequireClass[] */
   const order = ['lower', 'upper', 'digit', 'symbol']
 
   for (const name of require) {
@@ -34,11 +45,22 @@ function canonicalRequire(require) {
   return order.filter(name => require.includes(name))
 }
 
+/**
+ * @param {RequireClass[]} require
+ * @param {string} symbolSet
+ * @returns {string}
+ */
 function buildAlphabet(require, symbolSet) {
   return canonicalRequire(require)
     .map(name => getClassAlphabet(name, symbolSet))
     .join('')
 }
+
+/**
+ * @param {ByteStream} stream
+ * @param {string} alphabet
+ * @returns {string}
+ */
 
 function pickChar(stream, alphabet) {
   return alphabet[uniformIndex(stream, alphabet.length)]
@@ -46,7 +68,7 @@ function pickChar(stream, alphabet) {
 
 /**
  * @param {Uint8Array} siteKey
- * @param {PasswordPolicyInput} profile
+ * @param {Profile} profile
  * @returns {string}
  */
 export function generatePasswordFromSiteKey(siteKey, profile) {
@@ -72,6 +94,7 @@ export function generatePasswordFromSiteKey(siteKey, profile) {
   }
 
   const stream = new ByteStream(siteKey)
+  /** @type string[] */
   const chars = []
 
   for (const className of require) {

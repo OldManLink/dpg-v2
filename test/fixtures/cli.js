@@ -15,6 +15,8 @@ export function makeCliArgs(overrides = {}) {
     create: null,
     deleteLabel: null,
     showProfileLabel: null,
+    configPresent: false,
+    configArg: null,
     ...overrides
   }
 }

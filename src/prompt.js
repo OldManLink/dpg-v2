@@ -10,6 +10,7 @@ export function promptForMasterPassword() {
       output: process.stdout
     })
 
+    /** @type { (arg: string ) => void }*/
     const onData = char => {
       char = char + ''
       switch (char) {

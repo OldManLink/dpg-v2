@@ -1,145 +1,58 @@
-import { describe, it, expect } from 'vitest'
-import { parseArgs } from '../src/cli-args.js'
+import {describe, expect, it} from 'vitest'
+import {parseArgs} from '../src/cli-args.js'
+import {makeCliArgs} from "./fixtures/cli.js";
 
 describe('parseArgs', () => {
   it('parses -p <label>', () => {
-    expect(parseArgs(['-p', 'github-main'])).toEqual({
-      profileLabel: 'github-main',
-      show: false,
-      help: false,
-      bump: null,
-      list: false,
-      save: false,
-      create: null,
-      deleteLabel: null,
-      showProfileLabel: null
-    })
+    expect(parseArgs(['-p', 'github-main'])).toEqual(makeCliArgs({profileLabel: 'github-main'}))
   })
 
   it('parses --profile <label> --show', () => {
-    expect(parseArgs(['--profile', 'github-main', '--show'])).toEqual({
-      profileLabel: 'github-main',
-      show: true,
-      help: false,
-      bump: null,
-      list: false,
-      save: false,
-      create: null,
-      deleteLabel: null,
-      showProfileLabel: null
-    })
+    expect(parseArgs(['--profile', 'github-main', '--show'])).toEqual(makeCliArgs({profileLabel: 'github-main', show: true}))
   })
 
   it('parses -n <label>', () => {
-    expect(parseArgs(['-n', 'github-main'])).toEqual({
-      profileLabel: null,
-      show: false,
-      help: false,
-      list: false,
-      bump: null,
-      save: false,
-      create: 'github-main',
-      deleteLabel: null,
-      showProfileLabel: null
-    })
+    expect(parseArgs(['-n', 'github-main'])).toEqual(makeCliArgs({create: 'github-main'}))
   })
 
   it('parses --new <label>', () => {
-    expect(parseArgs(['--new', 'github-main'])).toEqual({
-      profileLabel: null,
-      show: false,
-      help: false,
-      list: false,
-      bump: null,
-      save: false,
-      create: 'github-main',
-      deleteLabel: null,
-      showProfileLabel: null
-    })
+    expect(parseArgs(['--new', 'github-main'])).toEqual(makeCliArgs({create: 'github-main'}))
   })
 
   it('parses -D <label>', () => {
-    expect(parseArgs(['-D', 'github-main'])).toEqual({
-      profileLabel: null,
-      show: false,
-      help: false,
-      list: false,
-      bump: null,
-      save: false,
-      create: null,
-      deleteLabel: 'github-main',
-      showProfileLabel: null
-    })
+    expect(parseArgs(['-D', 'github-main'])).toEqual(makeCliArgs({deleteLabel: 'github-main'}))
   })
 
   it('parses --delete <label>', () => {
-    expect(parseArgs(['--delete', 'github-main'])).toEqual({
-      profileLabel: null,
-      show: false,
-      help: false,
-      list: false,
-      bump: null,
-      save: false,
-      create: null,
-      deleteLabel: 'github-main',
-      showProfileLabel: null
-    })
+    expect(parseArgs(['--delete', 'github-main'])).toEqual(makeCliArgs({deleteLabel: 'github-main'}))
   })
 
   it('parses -b <label>', () => {
-    expect(parseArgs(['-b', 'github-main'])).toEqual({
-      profileLabel: null,
-      show: false,
-      help: false,
-      list: false,
-      bump: 'github-main',
-      save: false,
-      create: null,
-      deleteLabel: null,
-      showProfileLabel: null
-    })
+    expect(parseArgs(['-b', 'github-main'])).toEqual(makeCliArgs({bump: 'github-main'}))
   })
 
   it('parses --bump <label> --save --show', () => {
-    expect(parseArgs(['--bump', 'github-main', '--save', '--show'])).toEqual({
-      profileLabel: null,
-      show: true,
-      help: false,
-      list: false,
-      bump: 'github-main',
-      save: true,
-      create: null,
-      deleteLabel: null,
-      showProfileLabel: null
-    })
+    expect(parseArgs(['--bump', 'github-main', '--save', '--show'])).toEqual(makeCliArgs({show: true, bump: 'github-main', save: true}))
   })
 
   it('parses --show-profile <label>', () => {
-    expect(parseArgs(['--show-profile', 'github-main'])).toEqual({
-      profileLabel: null,
-      show: false,
-      help: false,
-      list: false,
-      bump: null,
-      save: false,
-      create: null,
-      deleteLabel: null,
-      showProfileLabel: 'github-main'
-    })
+    expect(parseArgs(['--show-profile', 'github-main'])).toEqual(makeCliArgs({showProfileLabel: 'github-main'}))
   })
 
   it('parses --help', () => {
-    expect(parseArgs(['--help'])).toEqual({
-      profileLabel: null,
-      show: false,
-      help: true,
-      bump: null,
-      list: false,
-      save: false,
-      create: null,
-      deleteLabel: null,
-      showProfileLabel: null
-    })
+    expect(parseArgs(['--help'])).toEqual(makeCliArgs({help: true}))
+  })
+
+  it('parses --config with no argument as show-config', () => {
+    expect(parseArgs(['--config'])).toEqual(makeCliArgs({configPresent: true}))
+  })
+
+  it('parses --config key=value', () => {
+    expect(parseArgs(['--config', 'timeout=900'])).toEqual(makeCliArgs({configPresent: true, configArg: 'timeout=900'}))
+  })
+
+  it('parses -c key=value', () => {
+    expect(parseArgs(['-c', 'sortBy=label'])).toEqual(makeCliArgs({configPresent: true, configArg: 'sortBy=label'}))
   })
 
   it('throws if profile label is missing after -p/--profile', () => {

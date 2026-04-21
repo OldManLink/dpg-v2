@@ -24,14 +24,6 @@
 
 /**
  * @typedef {{
- *   length: number,
- *   require: string[],
- *   symbolSet?: string
- * }} PasswordPolicyInput
- */
-
-/**
- * @typedef {{
  *   timeout?: number,
  *   sortBy?: ProfileSortField
  * }} Config
@@ -47,7 +39,9 @@
  *   save: boolean,
  *   create: string | null,
  *   deleteLabel: string | null,
- *   showProfileLabel: string | null
+ *   showProfileLabel: string | null,
+ *   configPresent: boolean,
+ *   configArg: string | null
  * }} CliArgs
  */
 
@@ -60,6 +54,8 @@
  *   promptForConfirmation?: (prompt: string) => Promise<string>,
  *   generatePassword?: (master: string, profile: Profile) => Promise<string>,
  *   copyToClipboard?: (text: string) => Promise<void>,
+ *   loadConfig?: () => Promise<Config>,
+ *   saveConfig?: (config: Config) => Promise<void>,
  *   stdout?: { write: (s: string) => void },
  *   stderr?: { write: (s: string) => void }
  * }} CliDeps

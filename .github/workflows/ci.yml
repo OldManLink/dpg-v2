@@ -26,8 +26,5 @@ jobs:
       - name: Link local CLI
         run: npm link
 
-      - name: Make integration runner executable
-        run: chmod +x integration/run.sh
-
       - name: Run TSV integration harness
         run: ./integration/run.sh

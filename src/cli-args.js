@@ -14,6 +14,8 @@ export function parseArgs(argv) {
   let create = null
   let deleteLabel = null
   let showProfileLabel = null
+  let configPresent = false
+  let configArg = null
 
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i]
@@ -48,6 +50,17 @@ export function parseArgs(argv) {
         throw new Error('Missing profile label after --show-profile')
       }
       showProfileLabel = next
+    } else if (arg === '-c' || arg === '--config') {
+      configPresent = true
+      const next = argv[i + 1]
+      if (next && !next.startsWith('-')) {
+        if (!next.includes('=')) {
+          throw new Error('Config update must use key=value syntax')
+        }
+
+        configArg = next
+        i++
+      }
     } else if (arg === '--list') {
       list = true
     } else if (arg === '--save') {
@@ -61,7 +74,7 @@ export function parseArgs(argv) {
     }
   }
 
-  return { profileLabel, show, help, list, bump, save, create, deleteLabel, showProfileLabel }
+  return { profileLabel, show, help, list, bump, save, create, deleteLabel, showProfileLabel, configPresent, configArg }
 }
 
 export function usageText() {
@@ -80,17 +93,22 @@ export function usageText() {
     '  dpg -D <label>',
     '  dpg --delete <label>',
     '  dpg --show-profile <label>',
+    '  dpg -c',
+    '  dpg --config',
+    '  dpg -c <key=value>',
+    '  dpg --config <key=value>',
     '  dpg --help',
     '',
     'Options:',
-    '  -p, --profile <label>       Generate password from existing profile',
-    '  -b, --bump <label>          Generate password using counter + 1',
-    '      --save                  Persist changes made by --bump',
-    '      --show                  Print generated password to stdout',
-    '      --list                  List available profiles',
-    '  -n, --new <label>           Create a new profile with default values',
-    '  -D, --delete <label>        Delete an existing profile (confirmation required)',
-    '      --show-profile <label>  Pretty-print a profile as JSON',
-    '  -h, --help                  Show this help text'
+    '  -p, --profile <label>        Generate password from existing profile',
+    '  -b, --bump <label>           Generate password using counter + 1',
+    '      --save                   Persist changes made by --bump',
+    '      --show                   Print generated password to stdout',
+    '      --list                   List available profiles',
+    '  -n, --new <label>            Create a new profile with default values',
+    '  -D, --delete <label>         Delete an existing profile (confirmation required)',
+    '      --show-profile <label>   Pretty-print a profile as JSON',
+    '      -c, --config [key=value] Show config or update a single config value',
+    '  -h, --help                   Show this help text'
   ].join('\n')
 }

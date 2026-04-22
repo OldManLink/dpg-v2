@@ -7,6 +7,7 @@ import { usageText } from './cli-args.js'
 import { promptForConfirmation } from './confirm.js'
 import { serializeProfilePretty } from './profile-serialization.js'
 import { formatProfileList } from './list-formatting.js'
+import {loadConfig, saveConfig, parseConfigAssignment, applyConfigUpdate} from "./config-file.js";
 /** @typedef {import('./models.js').CliDeps} CliDeps */
 /** @typedef {import('./models.js').CliArgs} CliArgs */
 
@@ -24,6 +25,8 @@ export async function runCli(args, deps = {}) {
     generatePassword: generate = generatePassword,
     copyToClipboard: copy = copyToClipboard,
     promptForConfirmation: confirm = promptForConfirmation,
+    loadConfig: loadCfg = loadConfig,
+    saveConfig: saveCfg = saveConfig,
     stdout = process.stdout,
     stderr = process.stderr
   } = deps
@@ -38,7 +41,8 @@ export async function runCli(args, deps = {}) {
 
     if (args.list) {
       const profiles = await loadAll()
-      stdout.write(formatProfileList(profiles) + '\n')
+      const config = await loadCfg()
+      stdout.write(formatProfileList(profiles, config.sortBy) + '\n')
       return 0
     }
 
@@ -132,6 +136,22 @@ export async function runCli(args, deps = {}) {
       return 0
     }
 
+    if (args.configPresent) {
+      const config = await loadCfg()
+
+      if (args.configArg === null) {
+        stdout.write(JSON.stringify(config, null, 2) + '\n')
+        return 0
+      }
+
+      const { key, value } = parseConfigAssignment(args.configArg)
+      const updated = applyConfigUpdate(config, key, value)
+
+      await saveCfg(updated)
+      stdout.write(`Updated config: ${key}=${value}\n`)
+      return 0
+    }
+
     const profile = await load(args.profileLabel)
     const masterPassword = await prompt()
     const password = await generate(masterPassword, profile)
@@ -192,6 +212,11 @@ function checkForConflicts(args) {
     usedTokens.push('--show-profile')
   }
 
+  if (args.configPresent) {
+    primary.push('config')
+    usedTokens.push('-c')
+  }
+
   if (primary.length === 0) {
     throw new Error('No command specified. See -h for help.')
   }
@@ -214,4 +239,3 @@ function checkForConflicts(args) {
     )
   }
 }
-

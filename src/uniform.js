@@ -1,3 +1,10 @@
+import { ByteStream } from './stream.js'
+
+/**
+ * @param {ByteStream} stream
+ * @param {number} n
+ * @returns {number}
+ */
 export function uniformIndex(stream, n) {
   if (n <= 0 || n > 256) {
     throw new Error('n must be between 1 and 256')

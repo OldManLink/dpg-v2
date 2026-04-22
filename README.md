@@ -228,6 +228,21 @@ Useful for:
 - verifying stored fields
 - piping into tools such as `jq`
 
+### Show config
+
+    dpg --config
+
+Prints the current config as pretty-printed JSON.
+
+### Update config
+
+    dpg --config timeout=900
+    dpg --config sortBy=label
+
+Supported keys:
+- `timeout` — non-negative integer seconds
+- `sortBy` — currently only `label`
+
 ### Help
 
     dpg --help

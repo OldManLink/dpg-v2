@@ -7,7 +7,7 @@
   },
   "type": "module",
   "scripts": {
-    "test": "vitest run --exclude 'test/**/*.slow.test.js'",
+    "test": "vitest --exclude 'test/**/*.slow.test.js'",
     "test:slow": "vitest run test/kdf.slow.test.js test/generate.slow.test.js --reporter=verbose",
     "test:all": "vitest run --reporter=verbose"
   },

@@ -62,7 +62,19 @@ match_output() {
   esac
 }
 
-trap restore_files EXIT
+cleanup() {
+  restore_files
+  rm -rf "$FAKE_BIN_DIR"
+}
+
+trap cleanup EXIT
+
+FAKE_BIN_DIR="$(mktemp -d)"
+
+cp "${SCRIPT_DIR}/fake-bin/xclip" "${FAKE_BIN_DIR}/xclip"
+chmod +x "${FAKE_BIN_DIR}/xclip"
+
+export PATH="${FAKE_BIN_DIR}:$PATH"
 
 mkdir -p "$DPG_DIR"
 

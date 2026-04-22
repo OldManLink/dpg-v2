@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+# Fake xclip for integration tests (CI-friendly)
+
+# Consume stdin and do nothing
+cat >/dev/null
+
+exit 0

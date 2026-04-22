@@ -1,0 +1,13 @@
+[
+  {
+    "version":"dpg:v2",
+    "label":"github-main",
+    "service":"github.com",
+    "counter":4,
+    "length":20,
+    "require":["lower","upper","digit","symbol"],
+    "symbolSet":"!@#",
+    "createdAt":"2026-04-20T00:00:00.000Z",
+    "updatedAt":"2026-04-20T00:00:00.000Z"
+  }
+]

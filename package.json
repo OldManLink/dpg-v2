@@ -7,9 +7,9 @@
   },
   "type": "module",
   "scripts": {
-    "test": "vitest",
-    "test:verbose": "vitest --reporter=verbose",
-    "test:slow": "vitest -t \"\\[slow\\]\" --reporter=verbose"
+    "test": "vitest --exclude 'test/**/*.slow.test.js'",
+    "test:slow": "vitest run test/kdf.slow.test.js test/generate.slow.test.js --reporter=verbose",
+    "test:all": "vitest run --reporter=verbose"
   },
   "devDependencies": {
     "@types/node": "^24.0.0",

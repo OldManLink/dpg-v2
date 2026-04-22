@@ -48,21 +48,11 @@ describe('generatePassword', () => {
 
 })
 
-describe('generatePassword (production Argon2)', () => {
-  it('works end-to-end with production Argon2 parameters [slow]', async () => {
-    const password = await generatePassword('master', DEFAULT_PROFILE)
-
-    expect(password).toHaveLength(DEFAULT_PROFILE.length)
-    expect(password).toMatch(/[a-z]/)
-    expect(password).toMatch(/[A-Z]/)
-    expect(password).toMatch(/[0-9]/)
-    expect(password).toMatch(/[!@#]/)
-  })
-
+describe('generatePassword (Golden test using production Argon2)', () => {
   // Golden test. If this fails, either:
   // 1) you improved the algorithm (unlikely), or
   // 2) you broke something (more likely)
-  it('[golden] produces expected password for known inputs', async () => {
+  it('produces expected password for known inputs [golden|slow]', async () => {
     const profile = {
       version: 'dpg:v2',
       label: 'andrew-test',
@@ -78,7 +68,6 @@ describe('generatePassword (production Argon2)', () => {
       'Walking Thoughts',
       profile
     )
-
     // Golden test: if this changes, the derivation behavior changed.
     expect(password).toBe('u)L]y5e}9X{WwUD)')
   })

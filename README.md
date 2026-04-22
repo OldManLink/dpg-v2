@@ -292,6 +292,20 @@ The test suite uses two modes:
 
 This keeps development fast while still verifying the real KDF path.
 
+### Test suites
+
+- `npm test` — fast tests (includes golden regression checks)
+- `npm run test:slow` — slow tests only
+- `npm run test:all` — full test suite
+
+## Integration test harness
+
+A lightweight TSV-driven CLI integration harness lives in `integration/`.
+
+Run it with:
+
+    ./integration/run.sh
+
 ---
 
 ## 🧭 Project goals

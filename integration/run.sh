@@ -99,6 +99,7 @@ echo "Running integration tests..."
 echo
 
 while IFS= read -r line || [[ -n "$line" ]]; do
+[[ -z "$line" || "$line" == \#* ]] && continue
 IFS=$'\t' read -r name cmd stdin expected_exit stdout_match expected_stdout stderr_match expected_stderr <<< "$line"
 
 if [[ -z "$stdout_match" || -z "$stderr_match" ]]; then

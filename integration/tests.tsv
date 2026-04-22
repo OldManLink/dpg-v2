@@ -1,4 +1,8 @@
 name	command	stdin	expected_exit	stdout_match	expected_stdout	stderr_match	expected_stderr
+
+# NOTE: Test cases are order-dependent.
+# Some tests rely on state changes from earlier rows (e.g. config updates).
+
 list-nonempty	dpg --list	-	0	contains	github-main	exact	-
 missing-command	dpg	-	1	exact	-	exact	No command specified. See -h for help.
 unknown-flag	dpg --shwo	-	1	exact	-	exact	Unknown argument: --shwo

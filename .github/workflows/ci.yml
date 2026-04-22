@@ -23,6 +23,9 @@ jobs:
       - name: Run full Vitest suite
         run: npm run test:all
 
+      - name: Link local CLI
+        run: npm link
+
       - name: Make integration runner executable
         run: chmod +x integration/run.sh
 

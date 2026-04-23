@@ -34,15 +34,15 @@ function getClassAlphabet(name, symbolSet) {
  */
 export function canonicalRequire(require) {
   /** @type RequireClass[] */
-  const order = ['lower', 'upper', 'digit', 'symbol']
+  const ORDER = ['lower', 'upper', 'digit', 'symbol']
 
   for (const name of require) {
-    if (!order.includes(name)) {
+    if (!ORDER.includes(name)) {
       throw new Error(`Unknown character class: ${name}`)
     }
   }
 
-  return order.filter(name => require.includes(name))
+  return ORDER.filter(name => require.includes(name))
 }
 
 /**

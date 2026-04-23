@@ -72,6 +72,17 @@ export function applyConfigUpdate(config, key, value) {
     }
   }
 
+  if (key === 'editor') {
+    if (!value) {
+      throw new Error(`No editor specified`)
+    }
+
+    return {
+      ...config,
+      editor: value
+    }
+  }
+
   throw new Error(`Unknown config key: '${key}'`)
 }
 
@@ -96,7 +107,8 @@ export async function loadConfig(options = {}) {
 
   return {
     timeout: parsed.timeout ?? 0,
-    sortBy: parsed.sortBy ?? 'label'
+    sortBy: parsed.sortBy ?? 'label',
+    editor: parsed.editor ?? ''
   }
 }
 
@@ -113,7 +125,8 @@ export async function saveConfig(config, options = {}) {
   await fs.mkdir(dir, { recursive: true })
   await fs.writeFile(tmpPath, JSON.stringify({
     timeout: config.timeout,
-    sortBy: config.sortBy
+    sortBy: config.sortBy,
+    editor: config.editor ?? ''
   }, null, 2), 'utf8')
   await fs.rename(tmpPath, configPath)
 }

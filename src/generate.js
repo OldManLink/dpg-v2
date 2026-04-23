@@ -8,7 +8,6 @@ import { generatePasswordFromSiteKey } from './password.js'
  * @param {object=} kdfOverrides
  * @returns {Promise<string>}
  */
-
 // generatePassword is async because Argon2id initialization/execution is async.
 export async function generatePassword(masterPassword, profile,  kdfOverrides = undefined) {
   if (typeof masterPassword !== 'string' || masterPassword.length === 0) {

@@ -18,5 +18,7 @@ config-bad-timeout	dpg --config timeout=abc	-	1	exact	-	contains	Invalid timeout
 config-unsupported	dpg --config sortBy=foo	-	1	exact	-	contains	Unsupported sortBy value: 'foo'
 config-show	dpg --config	-	0	contains	"sortBy": "label"	exact	-
 config-timeout	dpg --config timeout=900	-	0	contains	Updated config: timeout=900	exact	-
+config-editor	dpg --config editor=nano	-	0	contains	Updated config: editor=nano	exact	-
 config-show-updated	dpg --config	-	0	contains	"timeout": 900	exact	-
 show-profile	dpg --show-profile github-main	-	0	contains	"label": "github-main"	exact	-
+edit-missing	dpg --edit foobar	-	1	exact	-	contains	Profile not found: foobar

@@ -67,6 +67,18 @@ describe('applyConfigUpdate', () => {
     })
   })
 
+  it('updates editor', () => {
+    expect(applyConfigUpdate(defaultConfig(), 'editor', 'nano')).toEqual({
+      timeout: 0,
+      sortBy: 'label',
+      editor: 'nano'
+    })
+  })
+
+  it('allows empty editor value only when loaded from defaults, not via key=value update', () => {
+    expect(() => applyConfigUpdate(defaultConfig(), 'editor', '')).toThrow(/No editor/i)
+  })
+
   it('rejects unknown key', () => {
     expect(() => applyConfigUpdate(defaultConfig(), 'wat', 'x')).toThrow(/unknown config key/i)
   })
@@ -94,7 +106,8 @@ describe('saveConfig', () => {
     const text = await fs.readFile(configPath, 'utf8')
     expect(JSON.parse(text)).toEqual({
       timeout: 900,
-      sortBy: 'label'
+      sortBy: 'label',
+      editor: ''
     })
   })
 })

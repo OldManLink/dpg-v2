@@ -19,6 +19,14 @@ describe('parseArgs', () => {
     expect(parseArgs(['--new', 'github-main'])).toEqual(makeCliArgs({create: 'github-main'}))
   })
 
+  it('parses -e <label>', () => {
+    expect(parseArgs(['-e', 'github-main'])).toEqual(makeCliArgs({editLabel: 'github-main'}))
+  })
+
+  it('parses --edit <label>', () => {
+    expect(parseArgs(['--edit', 'github-main'])).toEqual(makeCliArgs({editLabel: 'github-main'}))
+  })
+
   it('parses -D <label>', () => {
     expect(parseArgs(['-D', 'github-main'])).toEqual(makeCliArgs({deleteLabel: 'github-main'}))
   })
@@ -76,6 +84,11 @@ describe('parseArgs', () => {
   it('throws if label is missing after -n/--new', () => {
     expect(() => parseArgs(['-n'])).toThrow(/missing profile label/i)
     expect(() => parseArgs(['--new'])).toThrow(/missing profile label/i)
+  })
+
+  it('throws if label is missing after -e/--edit', () => {
+    expect(() => parseArgs(['-e'])).toThrow(/label/i)
+    expect(() => parseArgs(['--edit'])).toThrow(/label/i)
   })
 
   it('throws if label is missing after -D/--delete', () => {

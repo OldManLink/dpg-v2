@@ -24,8 +24,20 @@
 
 /**
  * @typedef {{
+ *   service: string,
+ *   account?: string,
+ *   counter: number,
+ *   length: number,
+ *   require: RequireClass[],
+ *   symbolSet?: string
+ * }} EditableProfileFields
+ */
+
+/**
+ * @typedef {{
  *   timeout?: number,
- *   sortBy?: ProfileSortField
+ *   sortBy?: ProfileSortField,
+ *   editor?: string
  * }} Config
  */
 
@@ -42,6 +54,7 @@
  *   showProfileLabel: string | null,
  *   configPresent: boolean,
  *   configArg: string | null
+ *   editLabel: string | null
  * }} CliArgs
  */
 
@@ -54,6 +67,10 @@
  *   promptForConfirmation?: (prompt: string) => Promise<string>,
  *   generatePassword?: (master: string, profile: Profile) => Promise<string>,
  *   copyToClipboard?: (text: string) => Promise<void>,
+ *   readTempFile?: (filePath: string) => Promise<string>,
+ *   writeTempFile?: (label: string, content: string) => Promise<string>,
+ *   deleteTempFile?: (filePath: string) => Promise<void>,
+ *   openInEditor?: (editor: string, filePath: string) => Promise<number>,
  *   loadConfig?: () => Promise<Config>,
  *   saveConfig?: (config: Config) => Promise<void>,
  *   stdout?: { write: (s: string) => void },

@@ -32,7 +32,7 @@ function getClassAlphabet(name, symbolSet) {
  * @param {RequireClass[]} require
  * @returns {RequireClass[]}
  */
-function canonicalRequire(require) {
+export function canonicalRequire(require) {
   /** @type RequireClass[] */
   const order = ['lower', 'upper', 'digit', 'symbol']
 

@@ -3,7 +3,8 @@
 /** @type {Config} */
 export const DEFAULT_CONFIG = {
   timeout: 0,
-  sortBy: 'label'
+  sortBy: 'label',
+  editor: ''
 }
 
 /**

@@ -1,4 +1,5 @@
 /** @typedef {import('./models.js').Profile} Profile */
+/** @typedef {import('./models.js').ProfileEditField} ProfileEditField */
 /** @typedef {import('./models.js').EditableProfileFields} EditableProfileFields */
 import {canonicalRequire} from "./password.js";
 
@@ -28,6 +29,7 @@ export function mergeEditableProfileFields(original, edited){
   }
 }
 
+/** @type ProfileEditField[] */
 const EDITABLE_FIELDS = [
   'service',
   'account',
@@ -38,12 +40,19 @@ const EDITABLE_FIELDS = [
 ]
 
 /**
- * @param {import('./models.js').Profile} original
- * @param {import('./models.js').EditableProfileFields} edited
+ * @param {Profile} original
+ * @param {EditableProfileFields} edited
  * @returns {string[]}
  */
 export function diffChangedEditableFields(original, edited) {
+  /** @type ProfileEditField[] */
   const changed = []
+
+  /**
+   * @param {ProfileEditField} field
+   * @param {any} value
+   * @returns {any}
+   */
   function normalizeEditableValue(field, value) {
     if ((field === 'account' || field === 'symbolSet') && value === '') {
       return undefined

@@ -7,6 +7,10 @@
  */
 
 /**
+ * @typedef {'service' | 'account' | 'counter' | 'length' | 'require' | 'symbolSet' } ProfileEditField
+ */
+
+/**
  * @typedef {{
  *   version: string,
  *   label: string,

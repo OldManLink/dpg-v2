@@ -3,22 +3,23 @@ name	command	stdin	expected_exit	stdout_match	expected_stdout	stderr_match	expec
 # NOTE: Test cases are order-dependent.
 # Some tests rely on state changes from earlier rows (e.g. config updates).
 
-list-nonempty	dpg --list	-	0	contains	github-main	exact	-
 missing-command	dpg	-	1	exact	-	exact	No command specified. See -h for help.
+show-help	dpg -h	-	0	contains	Usage	exact	-
+list-nonempty	dpg --list	-	0	contains	github-main	exact	-
 unknown-flag	dpg --shwo	-	1	exact	-	exact	Unknown argument: --shwo
 bump-no-save	dpg -b github-main	password123	0	contains	Counter:	exact	-
 bump-with-save	dpg -b github-main --save	password123	0	contains	(saved)	exact	-
 invalid-combo	dpg --list --show	-	1	exact	-	contains	--show is only valid with --profile or --bump
 missing-label	dpg -b	-	1	exact	-	contains	Missing profile label after -b/--bump
 weird-order	dpg github-main -b	-	1	exact	-	contains	Unknown argument: github-main
-config-sortby	dpg --config sortBy=label	-	0	contains	Updated config: sortBy=label	exact	-
-config-bad-arg	dpg --config fubar	-	1	exact	-	contains	Config update must use key=value syntax
-config-bad-key	dpg --config wat=x	-	1	exact	-	contains	Unknown config key
-config-bad-timeout	dpg --config timeout=abc	-	1	exact	-	contains	Invalid timeout
-config-unsupported	dpg --config sortBy=foo	-	1	exact	-	contains	Unsupported sortBy value: 'foo'
 config-show	dpg --config	-	0	contains	"sortBy": "label"	exact	-
+config-sortby	dpg --config sortBy=label	-	0	contains	Updated config: sortBy=label	exact	-
+config-unsupported	dpg --config sortBy=foo	-	1	exact	-	contains	Unsupported sortBy value: 'foo'
 config-timeout	dpg --config timeout=900	-	0	contains	Updated config: timeout=900	exact	-
+config-bad-timeout	dpg --config timeout=abc	-	1	exact	-	contains	Invalid timeout
 config-editor	dpg --config editor=nano	-	0	contains	Updated config: editor=nano	exact	-
+config-bad-key	dpg --config wat=x	-	1	exact	-	contains	Unknown config key
+config-bad-arg	dpg --config fubar	-	1	exact	-	contains	Config update must use key=value syntax
 config-show-updated	dpg --config	-	0	contains	"timeout": 900	exact	-
 show-profile	dpg --show-profile github-main	-	0	contains	"label": "github-main"	exact	-
 edit-missing	dpg --edit foobar	-	1	exact	-	contains	Profile not found: foobar

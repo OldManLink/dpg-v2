@@ -9,6 +9,8 @@ import {tmpdir} from "node:os";
 import {loadAllProfiles, saveProfiles} from "../src/profiles-file.js";
 import { makeConfig } from './fixtures/config.js'
 /** @typedef {import('../src/models.js').Profile} Profile */
+/** @typedef {import('../src/models.js').Config} Config */
+
 
 describe('runCli', () => {
   it('loads profile, prompts for password, generates, copies, and prints success', async () => {
@@ -1065,7 +1067,7 @@ describe('runCli', () => {
           account: original.account,
           counter: original.counter,
           length: original.length,
-          require: ['lover', 'upper'],
+          require: ['runes', 'upper'],
           symbolSet: original.symbolSet
         }, null, 2),
         deleteTempFile: async () => {},
@@ -1081,7 +1083,6 @@ describe('runCli', () => {
   })
 
   it('updates editor config and persists it', async () => {
-    /** @type {import('../src/models.js').Config | null} */
     let savedConfig = null
     const stdout = { write: vi.fn() }
 

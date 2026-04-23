@@ -102,8 +102,8 @@ describe('diffChangedEditableFields', () => {
         account: 'peter@example.com',
         counter: 4,
         length: 20,
-        require: ['upper', // @ts-ignore
-          'lover'],
+        // @ts-ignore - intentional invalid RequireClass to test runtime validation
+        require: ['runes', 'upper'],
         symbolSet: '!@#'
       })
     ).toThrow(/Unknown character class/i)

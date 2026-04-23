@@ -5,9 +5,16 @@ import { generatePassword } from './generate.js'
 import { copyToClipboard } from './clipboard.js'
 import { usageText } from './cli-args.js'
 import { promptForConfirmation } from './confirm.js'
+import { canonicalRequire } from './password.js'
 import { serializeProfilePretty } from './profile-serialization.js'
 import { formatProfileList } from './list-formatting.js'
-import {loadConfig, saveConfig, parseConfigAssignment, applyConfigUpdate} from "./config-file.js";
+import { loadConfig, saveConfig, parseConfigAssignment, applyConfigUpdate } from "./config-file.js";
+import { readTempFile, writeTempFile, deleteTempFile, openInEditor } from "./editor.js"
+import {
+  diffChangedEditableFields,
+  extractEditableProfileFields,
+  mergeEditableProfileFields, validateEditableProfileFields
+} from "./editable-profile.js";
 /** @typedef {import('./models.js').CliDeps} CliDeps */
 /** @typedef {import('./models.js').CliArgs} CliArgs */
 
@@ -25,6 +32,10 @@ export async function runCli(args, deps = {}) {
     generatePassword: generate = generatePassword,
     copyToClipboard: copy = copyToClipboard,
     promptForConfirmation: confirm = promptForConfirmation,
+    readTempFile: readTemp = readTempFile,
+    writeTempFile: writeTemp = writeTempFile,
+    deleteTempFile: deleteTemp = deleteTempFile,
+    openInEditor: openEditor = openInEditor,
     loadConfig: loadCfg = loadConfig,
     saveConfig: saveCfg = saveConfig,
     stdout = process.stdout,
@@ -103,6 +114,77 @@ export async function runCli(args, deps = {}) {
 
       stdout.write(`Created profile: '${args.create}'\n`)
       return 0
+    }
+
+    if (args.editLabel) {
+      const original = await load(args.editLabel)
+
+      const editable = extractEditableProfileFields(original)
+      const content = JSON.stringify(editable, null, 2)
+
+      const tempPath = await writeTemp(args.editLabel, content)
+
+      try {
+        const config = await loadCfg()
+
+        const editor =
+          config.editor && config.editor.trim() !== ''
+            ? config.editor
+            : process.env.EDITOR && process.env.EDITOR.trim() !== ''
+              ? process.env.EDITOR
+              : 'vi'
+
+        const exitCode = await openEditor(editor, tempPath)
+
+        if (exitCode !== 0) {
+          stdout.write('Edit cancelled\n')
+          return 1
+        }
+
+        const editedText = await readTemp(tempPath)
+        let editedFields
+        try {
+          editedFields = JSON.parse(editedText)
+        } catch {
+          stderr.write('Invalid JSON in edited profile\n')
+          return 1
+        }
+        validateEditableProfileFields(editedFields)
+
+        const changedFields = diffChangedEditableFields(original, editedFields)
+
+        if (changedFields.length === 0) {
+          stdout.write('No changes made\n')
+          return 0
+        }
+
+        stdout.write(`Changed fields: ${changedFields.join(', ')}\n`)
+        stdout.write('Warning: changes to this profile will affect the generated password.\n')
+
+        const answer = await confirm(
+          `Save changes to profile '${args.editLabel}'? (y/N) `
+        )
+
+        if (answer !== 'y') {
+          stdout.write('No changes saved\n')
+          return 0
+        }
+
+        const updatedProfile = {
+        ...mergeEditableProfileFields(original, editedFields),
+          require: canonicalRequire(editedFields.require),
+            updatedAt: new Date().toISOString()
+        }
+
+        const all = await loadAll()
+        const updated = all.map(p => p.label === original.label ? updatedProfile : p)
+
+        await save(updated)
+        stdout.write(`Updated profile '${args.editLabel}'\n`)
+        return 0
+      } finally {
+        await deleteTemp(tempPath)
+      }
     }
 
     if (args.deleteLabel) {
@@ -200,6 +282,11 @@ function checkForConflicts(args) {
   if (args.create) {
     primary.push('create')
     usedTokens.push('-n')
+  }
+
+  if (args.editLabel) {
+    primary.push('edit')
+    usedTokens.push('-e')
   }
 
   if (args.deleteLabel) {

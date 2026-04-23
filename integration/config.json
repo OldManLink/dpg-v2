@@ -1,4 +1,5 @@
 {
-  "timeout": 90,
-  "sortBy": "label"
+  "timeout":90,
+  "sortBy":"label",
+  "editor":"notepad.exe"
 }

@@ -41,7 +41,7 @@ describe('generatePassword', () => {
   it('rejects an empty master password', async () => {
     const {toThrow} = expect(
         generatePassword('', DEFAULT_PROFILE, TEST_KDF)
-    // IntelliJ doesn't understand `.rejects`. The test runner does. We trust the test runner.
+    // Promise rejection assertion (supported by Vitest)
     )["rejects"];
     await toThrow(/master password/i)
   })

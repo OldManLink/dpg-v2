@@ -1,8 +1,7 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
-// IntelliJ may fail to resolve this subpath import, but Node/Vitest handle it correctly.
-// noinspection JSFileReferences
+// noinspection JSFileReferences - resolved at runtime by Node/Vitest
 import setupWasm from 'argon2id/lib/setup.js'
 import { ARGON2_PARAMS } from './argon2params.js'
 import { normalizeText } from './text.js'

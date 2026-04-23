@@ -10,7 +10,6 @@ RED="\033[0;31m"
 RESET="\033[0m"
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 
 DPG_DIR="${HOME}/.dpg-v2"
 PROFILES_FILE="${DPG_DIR}/profiles.json"

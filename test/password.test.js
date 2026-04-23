@@ -78,8 +78,8 @@ describe('generatePasswordFromSiteKey', () => {
     expect(() =>
       generatePasswordFromSiteKey(fixedSiteKey(), makeProfile({
         length: 10,
-        require: ['lower', /* @ts-ignore */
-          'runes'],
+        // @ts-ignore - intentional invalid RequireClass to test runtime validation
+        require: ['runes', 'lower'],
         symbolSet: '!@#'
       }))
     ).toThrow(/unknown/i)

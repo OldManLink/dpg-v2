@@ -179,6 +179,73 @@ Rules:
 - label may contain only letters, digits, dot, underscore, and hyphen
 - spaces are not allowed
 
+### Editing a profile
+
+```bash
+dpg --edit <label>
+```
+
+Opens the specified profile in your editor as JSON.
+
+You can modify the following fields:
+
+- service
+- account
+- counter
+- length
+- require
+- symbolSet
+
+The following fields are not editable:
+
+- label
+- version
+- createdAt
+- updatedAt
+
+#### Behavior
+
+After saving and exiting the editor:
+
+- The edited JSON is parsed and validated
+- Invalid JSON or invalid values will be rejected and no changes will be saved
+- If no changes were made, the command exits with:
+
+```text
+No changes made
+```
+
+- If changes were made:
+    - The changed fields are listed
+    - A warning is shown that the generated password will be affected
+    - You are prompted to confirm before saving
+
+Example:
+
+```bash
+dpg --edit github-main
+```
+
+#### ⚠️ Important
+
+Changes to a profile will affect the **generated password**.
+
+---
+
+### Editor configuration
+
+You can configure which editor is used:
+
+```bash
+dpg --config editor=vim
+```
+
+Editor selection follows this order:
+
+1. Configured editor
+2. $EDITOR environment variable
+3. Fallback (vi)
+
 ### Delete a profile
 
     dpg -D github-main
@@ -242,6 +309,7 @@ Prints the current config as pretty-printed JSON.
 Supported keys:
 - `timeout` — non-negative integer seconds
 - `sortBy` — currently only `label`
+- `editor` — your preferred tool for editing profiles
 
 ### Help
 

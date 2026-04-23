@@ -8,9 +8,11 @@ import path from "node:path";
 import {tmpdir} from "node:os";
 import {loadAllProfiles, saveProfiles} from "../src/profiles-file.js";
 import { makeConfig } from './fixtures/config.js'
+import {openInEditor} from "../src/editor.js";
 /** @typedef {import('../src/models.js').Profile} Profile */
 /** @typedef {import('../src/models.js').Config} Config */
-
+/** @typedef {import('../src/models.js').EditorSpawn} EditorSpawn */
+/** @typedef {import('node:child_process').ChildProcess} ChildProcess */
 
 describe('runCli', () => {
   it('loads profile, prompts for password, generates, copies, and prints success', async () => {
@@ -1103,5 +1105,98 @@ describe('runCli', () => {
       editor: 'nano'
     })
     expect(stdout.write).toHaveBeenCalledWith('Updated config: editor=nano\n')
+  })
+
+  it('uses editor command with arguments from config', async () => {
+    const original = makeProfile({ label: 'github-main' })
+    let usedEditor = null
+
+    await runCli(
+      makeCliArgs({ editLabel: 'github-main' }),
+      {
+        loadProfileByLabel: async () => original,
+        loadAllProfiles: async () => [original],
+        loadConfig: async () => makeConfig({ editor: 'code --wait' }),
+        writeTempFile: async () => '/tmp/file.json',
+        openInEditor: async (editor) => {
+          usedEditor = editor
+          return 1
+        },
+        deleteTempFile: async () => {},
+        stdout: { write: vi.fn() },
+        stderr: { write: vi.fn() }
+      }
+    )
+
+    expect(usedEditor).toBe('code --wait')
+  })
+
+  it('splits editor command and appends file path', async () => {
+    let spawnedCommand = null
+    let spawnedArgs = null
+
+    const fakeSpawn =
+      /** @type {EditorSpawn} */ (
+      /** @type {unknown} */ (
+        /**
+         * @param {string} command
+         * @param {readonly string[]} args
+         * @param {object=} _options
+         * @returns {ChildProcess}
+         */
+          (command, args, _options) => {
+          spawnedCommand = command
+          spawnedArgs = [...args]
+
+          return /** @type {ChildProcess} */ ({
+            on: (
+              /** @type {'error' | 'close'} */ event,
+              /** @type {(value: any) => void} */ handler
+            ) => {
+              if (event === 'close') handler(0)
+            }
+          })
+        }
+      )
+    )
+
+    await openInEditor('code --wait', '/tmp/file.json', fakeSpawn)
+
+    expect(spawnedCommand).toBe('code')
+    expect(spawnedArgs).toEqual(['--wait', '/tmp/file.json'])
+  })
+
+  it('supports quoted editor paths', async () => {
+    let spawnedCommand = null
+    let spawnedArgs = null
+
+    const fakeSpawn =
+      /** @type {EditorSpawn} */ (
+      /** @type {unknown} */ (
+        /**
+         * @param {string} command
+         * @param {readonly string[]} args
+         * @param {object=} _options
+         * @returns {ChildProcess}
+         */
+          (command, args, _options) => {
+          spawnedCommand = command
+          spawnedArgs = [...args]
+
+          return /** @type {ChildProcess} */ ({
+            on: (
+              /** @type {'error' | 'close'} */ event,
+              /** @type {(value: any) => void} */ handler
+            ) => {
+              if (event === 'close') handler(0)
+            }
+          })
+        }
+      )
+    )
+
+    await openInEditor('"C:\\Program Files\\Editor\\editor.exe" --wait', 'C:\\tmp\\file.json', fakeSpawn)
+    expect(spawnedCommand).toBe('C:\\Program Files\\Editor\\editor.exe')
+    expect(spawnedArgs).toEqual(['--wait', 'C:\\tmp\\file.json'])
   })
 })

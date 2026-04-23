@@ -23,3 +23,5 @@ config-bad-arg	dpg --config fubar	-	1	exact	-	contains	Config update must use ke
 config-show-updated	dpg --config	-	0	contains	"timeout": 900	exact	-
 show-profile	dpg --show-profile github-main	-	0	contains	"label": "github-main"	exact	-
 edit-missing	dpg --edit foobar	-	1	exact	-	contains	Profile not found: foobar
+config-editor-with-args	dpg --config "editor=vi -f"	-	0	contains	Updated config: editor=vi -f	exact	-
+config-show-editor-with-args	dpg --config	-	0	contains	"editor": "vi -f"	exact	-

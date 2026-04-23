@@ -110,4 +110,8 @@
  * }} ClipboardOptions
  */
 
+/**
+ * @typedef {typeof import('node:child_process').spawn} EditorSpawn
+ */
+
 export {}

@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "bin": {
-    "dpg": "./src/cli.js"
+    "dpg-cli": "./src/cli.js"
   },
   "type": "module",
   "scripts": {

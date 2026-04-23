@@ -133,10 +133,10 @@ npm install
 npm test
 ```
 
-Verbose output:
+Verbose output (fast and slow tests):
 
 ```
-npm run test:verbose
+npm run test:all
 ```
 
 Slow Argon2 tests only:

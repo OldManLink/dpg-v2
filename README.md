@@ -22,7 +22,7 @@ DPG v2 derives site-specific passwords from a master password plus structured pr
 npm install
 npm test
 npm link
-dpg -p github-main
+dpg-cli -p github-main
 ```
 
 ## Deterministic Password Generator
@@ -153,7 +153,7 @@ DPG v2 includes a CLI for generating passwords from existing profiles.
 
 ### Generate from profile
 
-    dpg -p github-main
+    dpg-cli -p github-main
 
 This will:
 
@@ -164,13 +164,13 @@ This will:
 
 ### Show the generated password
 
-    dpg -p github-main --show
+    dpg-cli -p github-main --show
 
 This also prints the generated password to stdout.
 
 ### Create a new profile
 
-    dpg --new github-work
+    dpg-cli --new github-work
 
 Creates a new profile with sensible defaults.
 
@@ -182,7 +182,7 @@ Rules:
 ### Editing a profile
 
 ```bash
-dpg --edit <label>
+dpg-cli --edit <label>
 ```
 
 Opens the specified profile in your editor as JSON.
@@ -223,7 +223,7 @@ No changes made
 Example:
 
 ```bash
-dpg --edit github-main
+dpg-cli --edit github-main
 ```
 
 #### ⚠️ Important
@@ -237,7 +237,7 @@ Changes to a profile will affect the **generated password**.
 You can configure which editor is used:
 
 ```bash
-dpg --config editor=vim
+dpg-cli --config editor=vim
 ```
 
 Editor selection follows this order:
@@ -248,7 +248,7 @@ Editor selection follows this order:
 
 ### Delete a profile
 
-    dpg -D github-main
+    dpg-cli -D github-main
 
 Prompts for confirmation before deleting the profile.
 
@@ -256,13 +256,13 @@ Only an explicit `y` confirms deletion. Any other response cancels it.
 
 ### List profiles
 
-    dpg --list
+    dpg-cli --list
 
 This prints the available profiles in sorted order.
 
 ### Bump a profile counter without saving
 
-    dpg -b github-main
+    dpg-cli -b github-main
 
 This will:
 
@@ -274,19 +274,19 @@ This will:
 
 ### Bump and save
 
-    dpg -b github-main --save
+    dpg-cli -b github-main --save
 
 This does the same thing, but also persists the incremented counter back to `profiles.json`, and reports it as saved.
 
 ### Bump, save, and show
 
-    dpg -b github-main --save --show
+    dpg-cli -b github-main --save --show
 
 This also prints the generated password to stdout.
 
 ### Show a profile
 
-    dpg --show-profile github-main
+    dpg-cli --show-profile github-main
 
 Prints the full profile as pretty-printed JSON.
 
@@ -297,14 +297,14 @@ Useful for:
 
 ### Show config
 
-    dpg --config
+    dpg-cli --config
 
 Prints the current config as pretty-printed JSON.
 
 ### Update config
 
-    dpg --config timeout=900
-    dpg --config sortBy=label
+    dpg-cli --config timeout=900
+    dpg-cli --config sortBy=label
 
 Supported keys:
 - `timeout` — non-negative integer seconds
@@ -313,7 +313,7 @@ Supported keys:
 
 ### Help
 
-    dpg --help
+    dpg-cli --help
 
 ### Profiles file location
 
@@ -327,7 +327,7 @@ DPG v2 looks for profiles here by default:
     npm install
     npm link
 
-After that, the `dpg` command should be available in your shell.
+After that, the `dpg-cli` command should be available in your shell.
 
 ### Clipboard support
 

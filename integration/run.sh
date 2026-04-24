@@ -38,9 +38,22 @@ restore_files() {
   fi
 }
 
+unescape() {
+  local s="$1"
+
+  # Custom TSV escapes:
+  # \n -> newline
+  # \q -> double quote
+  s="${s//\\n/$'\n'}"
+  s="${s//\\q/\"}"
+
+  printf "%s" "$s"
+}
+
 match_output() {
   local mode="$1"
-  local expected="$2"
+  local expected
+  expected="$(unescape "$2")"
   local actual="$3"
 
   if [[ "$expected" == "-" ]]; then
@@ -111,11 +124,14 @@ fi
 
   echo "→ $name"
 
+stdin_file="$(mktemp)"
 stdout_file="$(mktemp)"
 stderr_file="$(mktemp)"
+cmd="$(unescape "$cmd")"
 
 if [[ "$stdin" != "-" ]]; then
-  printf '%s\n' "$stdin" | eval "$cmd" >"$stdout_file" 2>"$stderr_file"
+  printf '%s\n' "$(unescape "$stdin")" > "$stdin_file"
+  eval "$cmd" < "$stdin_file" >"$stdout_file" 2>"$stderr_file"
   exit_code=$?
 else
   eval "$cmd" >"$stdout_file" 2>"$stderr_file"
@@ -125,7 +141,7 @@ fi
 stdout_content="$(cat "$stdout_file")"
 stderr_content="$(cat "$stderr_file")"
 
-rm -f "$stdout_file" "$stderr_file"
+rm -f "$stdin_file" "$stdout_file" "$stderr_file"
 
 if [[ "$exit_code" != "$expected_exit" ]]; then
   echo -e "${RED}FAIL${RESET}: expected exit $expected_exit, got $exit_code"

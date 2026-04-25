@@ -1,7 +1,8 @@
 /** @typedef {import('./models.js').Profile} Profile */
 /** @typedef {import('./models.js').ProfileEditField} ProfileEditField */
 /** @typedef {import('./models.js').EditableProfileFields} EditableProfileFields */
-import {canonicalRequire} from "./password.js";
+
+import {canonicalRequire, canonicalSymbolSet} from "./profile-validation.js";
 
 /**
  * @param {Profile} profile
@@ -25,7 +26,9 @@ export function extractEditableProfileFields(profile){
 export function mergeEditableProfileFields(original, edited){
   return {
     ...original,
-    ...edited
+    ...edited,
+    require: canonicalRequire(edited.require),
+    symbolSet: canonicalSymbolSet(edited.symbolSet)
   }
 }
 
@@ -101,7 +104,7 @@ export function validateEditableProfileFields(edited) {
     canonicalRequire(edited.require)
   }
 
-  if (edited.symbolSet !== undefined && typeof edited.symbolSet !== 'string') {
-    throw new Error('Invalid symbolSet')
+  if (edited.symbolSet !== undefined) {
+    canonicalSymbolSet(edited.symbolSet)
   }
 }

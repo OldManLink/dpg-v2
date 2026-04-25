@@ -5,7 +5,6 @@ import { generatePassword } from './generate.js'
 import { copyToClipboard } from './clipboard.js'
 import { usageText } from './cli-args.js'
 import { promptForConfirmation } from './confirm.js'
-import { canonicalRequire } from './password.js'
 import { serializeProfilePretty } from './profile-serialization.js'
 import { formatProfileList } from './list-formatting.js'
 import { loadConfig, saveConfig, parseConfigAssignment, applyConfigUpdate } from "./config-file.js";
@@ -172,7 +171,6 @@ export async function runCli(args, deps = {}) {
 
         const updatedProfile = {
         ...mergeEditableProfileFields(original, editedFields),
-          require: canonicalRequire(editedFields.require),
             updatedAt: new Date().toISOString()
         }
 

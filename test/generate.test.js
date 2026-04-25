@@ -46,6 +46,15 @@ describe('generatePassword', () => {
     await toThrow(/master password/i)
   })
 
+  it('generates the same password for equivalent symbolSet orderings', async () => {
+    const a = makeProfile({ symbolSet: '!@#' })
+    const b = makeProfile({ symbolSet: '@!#' })
+
+    const passwordA = await generatePassword('master password', a)
+    const passwordB = await generatePassword('master password', b)
+
+    expect(passwordA).toBe(passwordB)
+  })
 })
 
 describe('generatePassword (Golden test using production Argon2)', () => {
@@ -61,15 +70,14 @@ describe('generatePassword (Golden test using production Argon2)', () => {
       counter: 42,
       length: 16,
       require: ['lower', 'upper', 'digit', 'symbol'],
-      symbolSet: '!@#{}[]()+-'
+      symbolSet: '@!#{}[]()+-'
     }
 
     const password = await generatePassword(
       'Walking Thoughts',
       profile
     )
-    // Golden test: if this changes, the derivation behavior changed.
-    expect(password).toBe('u)L]y5e}9X{WwUD)')
+    // Golden output: update only when the canonical context or derivation intentionally changes.
+    expect(password).toBe('ekd!P(Iwk5VHAa1y')
   })
 })
-

@@ -10,7 +10,7 @@ export const DEFAULT_PROFILE = {
   counter: 1,
   length: 20,
   require: ['lower', 'upper', 'digit', 'symbol'],
-  symbolSet: '!@#',
+  symbolSet: '@!#',
   notes: '',
   createdAt: '2026-04-12T00:00:00.000Z',
   updatedAt: '2026-04-12T00:00:00.000Z'
@@ -23,7 +23,7 @@ export const DEFAULT_PROFILE_EDITABLE_FIELDS = {
   counter: 1,
   length: 20,
   require: ['lower', 'upper', 'digit', 'symbol'],
-  symbolSet: '!@#'
+  symbolSet: '@!#'
 }
 
 /**

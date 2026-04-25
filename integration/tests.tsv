@@ -15,7 +15,6 @@ weird-order	dpg-cli github-main -b	-	1	exact	-	contains	Unknown argument: github
 bump-no-save	dpg-cli -b github-main	password123	0	contains	Counter:	exact	-
 bump-with-save	dpg-cli -b github-main --save	password123	0	contains	(saved)	exact	-
 
-config-show	dpg-cli --config	-	0	contains	\qsortBy\q: \qlabel\q	exact	-
 config-sortby	dpg-cli --config sortBy=label	-	0	contains	Updated config: sortBy=label	exact	-
 config-unsupported	dpg-cli --config sortBy=foo	-	1	exact	-	contains	Unsupported sortBy value: 'foo'
 config-timeout	dpg-cli --config timeout=900	-	0	contains	Updated config: timeout=900	exact	-
@@ -30,3 +29,15 @@ config-show-editor-with-args	dpg-cli --config	-	0	contains	\qeditor\q: \qvi -f\q
 show-profile	dpg-cli --show-profile github-main	-	0	contains	\qlabel\q: \qgithub-main\q	exact	-
 
 edit-missing	dpg-cli --edit foobar	-	1	exact	-	contains	Profile not found: foobar
+
+create-reqsym	dpg-cli --new reqsym	-	0	exact	Created profile: 'reqsym'	exact	-
+
+config-fake-editor-1	dpg-cli --config \qeditor=fake_ed req_1\q	-	0	contains	Updated config: editor=fake_ed req_1	exact	-
+fake-edit-req_1	dpg-cli --edit reqsym	-	0	contains	No changes made	exact	-
+config-fake-editor-2	dpg-cli --config \qeditor=fake_ed req_2\q	-	0	contains	Updated config: editor=fake_ed req_2	exact	-
+fake-edit-req_2	dpg-cli --edit reqsym	y	1	exact	-	exact	Unknown character class: 'runes'
+
+config-fake-editor-3	dpg-cli --config \qeditor=fake_ed sym_1\q	-	0	contains	Updated config: editor=fake_ed sym_1	exact	-
+fake-edit-sym_1	dpg-cli --edit reqsym	-	0	contains	No changes made	exact	-
+config-fake-editor-3	dpg-cli --config \qeditor=fake_ed sym_2\q	-	0	contains	Updated config: editor=fake_ed sym_2	exact	-
+fake-edit-sym_2	dpg-cli --edit reqsym	y	1	exact	-	exact	symbolSet contains duplicated character: '!'

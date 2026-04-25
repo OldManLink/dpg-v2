@@ -1,0 +1,8 @@
+{
+  "service": "reqsym",
+  "counter": 0,
+  "length": 20,
+  "require": ["runes","upper","digit","symbol"],
+  "comment": "bad require class 'runes'",
+  "symbolSet": "@!#"
+}

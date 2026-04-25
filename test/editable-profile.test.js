@@ -1,9 +1,6 @@
 import { describe, it, expect } from 'vitest'
-import {
-  extractEditableProfileFields,
-  mergeEditableProfileFields,
-  diffChangedEditableFields, validateEditableProfileFields
-} from '../src/editable-profile.js'
+import { extractEditableProfileFields, mergeEditableProfileFields,
+  diffChangedEditableFields, validateEditableProfileFields } from '../src/editable-profile.js'
 import { makeProfile, makeEditableProfileFields } from './fixtures/profiles.js'
 
 describe('extractEditableProfileFields', () => {
@@ -14,7 +11,7 @@ describe('extractEditableProfileFields', () => {
       counter: 4,
       length: 20,
       require: ['lower', 'upper', 'digit', 'symbol'],
-      symbolSet: '!@#',
+      symbolSet: '@!#',
       notes: 'should not be editable here'
     })
 
@@ -24,7 +21,7 @@ describe('extractEditableProfileFields', () => {
       counter: 4,
       length: 20,
       require: ['lower', 'upper', 'digit', 'symbol'],
-      symbolSet: '!@#'
+      symbolSet: '@!#'
     })
   })
 })
@@ -44,7 +41,7 @@ describe('mergeEditableProfileFields', () => {
       length: 24,
       //* @type RequireClass[] */
       require: ['lower', 'upper', 'digit'],
-      symbolSet: '!@#'
+      symbolSet: '@!#'
     })
 
     const merged = mergeEditableProfileFields(original, edited)
@@ -58,6 +55,7 @@ describe('mergeEditableProfileFields', () => {
     expect(merged.counter).toBe(9)
     expect(merged.length).toBe(24)
     expect(merged.require).toEqual(['lower', 'upper', 'digit'])
+    expect(merged.symbolSet).toEqual('@!#')
   })
 })
 
@@ -76,7 +74,7 @@ describe('diffChangedEditableFields', () => {
       counter: 4,
       length: 20,
       require: ['lower', 'upper', 'digit', 'symbol'],
-      symbolSet: '!@#'
+      symbolSet: '@!#'
     })
 
     const edited = makeEditableProfileFields({
@@ -85,7 +83,7 @@ describe('diffChangedEditableFields', () => {
       counter: 5,
       length: 20,
       require: ['lower', 'upper', 'digit'],
-      symbolSet: '!@#'
+      symbolSet: '@!#'
     })
 
     expect(diffChangedEditableFields(original, edited)).toEqual([
@@ -104,7 +102,7 @@ describe('diffChangedEditableFields', () => {
         length: 20,
         // @ts-ignore - intentional invalid RequireClass to test runtime validation
         require: ['runes', 'upper'],
-        symbolSet: '!@#'
+        symbolSet: '@!#'
       })
     ).toThrow(/Unknown character class/i)
   })

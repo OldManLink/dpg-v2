@@ -649,7 +649,7 @@ describe('runCli', () => {
       counter: 4,
       length: 20,
       require: ['lower', 'upper', 'digit', 'symbol'],
-      symbolSet: '!@#'
+      symbolSet: '@!#'
     })
 
     /** @type {Profile[] | null} */
@@ -671,7 +671,7 @@ describe('runCli', () => {
           counter: 4,
           length: 20,
           require: ['lower', 'upper', 'digit', 'symbol'],
-          symbolSet: '!@#'
+          symbolSet: '@!#'
         }, null, 2),
         deleteTempFile: async () => {},
         promptForConfirmation: async () => 'y',
@@ -787,7 +787,7 @@ describe('runCli', () => {
           counter: 4,
           length: -1,
           require: ['lower', 'upper'],
-          symbolSet: '!@#'
+          symbolSet: '@!#'
         }, null, 2),
         deleteTempFile: async () => {},
         promptForConfirmation: async () => 'y',

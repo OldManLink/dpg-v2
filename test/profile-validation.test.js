@@ -1,6 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { validateProfileLabel } from '../src/profile-validation.js'
-import {canonicalRequire} from "../src/password.js";
+import {canonicalRequire, canonicalSymbolSet, validateProfileLabel} from '../src/profile-validation.js'
 
 describe('validateProfileLabel', () => {
   it('accepts simple labels', () => {
@@ -46,4 +45,55 @@ describe('validateProfileLabel', () => {
     expect(canonicalRequire(['upper', 'lower', 'upper']))
       .toEqual(['lower', 'upper'])
   })
+
+  describe('canonicalSymbolSet', () => {
+    it('keeps canonical symbol order unchanged', () => {
+      expect(canonicalSymbolSet('@%+/!#$^.()[]{}~-_')).toBe('@%+/!#$^.()[]{}~-_')
+    })
+
+    it('normalizes symbolSet to canonical order', () => {
+      expect(canonicalSymbolSet('!@#')).toBe('@!#')
+    })
+
+    it('normalizes different input orders to the same output', () => {
+      expect(canonicalSymbolSet('#!@')).toBe(canonicalSymbolSet('@#!'))
+    })
+
+    it('rejects duplicate characters', () => {
+      expect(() => canonicalSymbolSet('@!#!')).toThrow(
+        /symbolSet contains duplicated character: '!'/i
+      )
+    })
+
+    it('rejects lowercase letters', () => {
+      expect(() => canonicalSymbolSet('!a')).toThrow(
+        /symbolSet contains invalid character: 'a'/i
+      )
+    })
+
+    it('rejects uppercase letters', () => {
+      expect(() => canonicalSymbolSet('!A')).toThrow(
+        /symbolSet contains invalid character: 'A'/i
+      )
+    })
+
+    it('rejects digits', () => {
+      expect(() => canonicalSymbolSet('!0')).toThrow(
+        /symbolSet contains invalid character: '0'/i
+      )
+    })
+
+    it('rejects unsupported symbols', () => {
+      expect(() => canonicalSymbolSet('!*')).toThrow(
+        /symbolSet contains invalid character: '\*'/i
+      )
+    })
+
+    it('rejects empty symbolSet', () => {
+      expect(() => canonicalSymbolSet('')).toThrow(
+        /symbolSet must not be empty/i
+      )
+    })
+  })
+
 })

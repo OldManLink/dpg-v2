@@ -1,7 +1,7 @@
 import { ByteStream } from './stream.js'
 import { uniformIndex } from './uniform.js'
 import { deterministicShuffle } from './shuffle.js'
-import {canonicalRequire, canonicalSymbolSet} from "./profile-validation.js";
+import {CANONICAL_SYMBOLS, canonicalRequire, canonicalSymbolSet} from "./profile-validation.js";
 /** @typedef {import('./models.js').Profile} Profile */
 /** @typedef {import('./models.js').RequireClass} RequireClass */
 
@@ -58,7 +58,7 @@ function pickChar(stream, alphabet) {
 export function generatePasswordFromSiteKey(siteKey, profile) {
   const require = canonicalRequire(profile.require ?? [])
   const length = profile.length
-  const symbolSet = canonicalSymbolSet(profile.symbolSet ?? '!#$%&*+-=?@^_')
+  const symbolSet = canonicalSymbolSet(profile.symbolSet ?? CANONICAL_SYMBOLS)
 
   if (!Number.isInteger(length) || length < 1) {
     throw new Error('length must be a positive integer')

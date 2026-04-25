@@ -1,6 +1,7 @@
 /** @typedef {import('./models.js').RequireClass} RequireClass */
 /** @type RequireClass[] */
 export const REQUIRE_CLASS_ORDER = ['lower', 'upper', 'digit', 'symbol']
+export const CANONICAL_SYMBOLS = '@%+/!#$^.()[]{}~-_'
 
 const PROFILE_LABEL_RE = /^[A-Za-z0-9._-]+$/
 /**
@@ -39,8 +40,6 @@ export function canonicalRequire(require) {
  * @returns {string}
  */
 export function canonicalSymbolSet(symbolSet) {
-  const CANONICAL_SYMBOLS = '@%+/!#$^.()[]{}~-_'
-
   if (typeof symbolSet !== 'string') {
     throw new Error('symbolSet must be a string')
   }

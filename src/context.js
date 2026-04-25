@@ -1,3 +1,4 @@
+import { canonicalRequire, canonicalSymbolSet } from './profile-validation.js'
 /** @typedef {import('./models.js').Profile} Profile */
 /** @typedef {import('./models.js').RequireClass} RequireClass */
 /**
@@ -16,16 +17,6 @@ export function encodeContext(profile) {
     return `${bytes.length}:${str}\0`
   }
 
-  /**
-   * @param {RequireClass[]} req
-   * @returns {string}
-   */
-  function normalizeRequire(req) {
-    /** @type RequireClass[] */
-    const order = ['lower', 'upper', 'digit', 'symbol']
-    return order.filter(x => req.includes(x)).join(',')
-  }
-
   const parts = [
     'DPGCTX\0',
     field(profile.version),
@@ -33,8 +24,8 @@ export function encodeContext(profile) {
     field(profile.account || ''),
     field(String(profile.counter)),
     field(String(profile.length)),
-    field(normalizeRequire(profile.require)),
-    field(profile.symbolSet || '')
+    field(String(canonicalRequire(profile.require))),
+    field(String(canonicalSymbolSet(profile.symbolSet || '')))
   ]
 
   return encoder.encode(parts.join(''))

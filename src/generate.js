@@ -1,6 +1,7 @@
 import { encodeContext } from './context.js'
 import { deriveSiteKey } from './kdf.js'
 import { generatePasswordFromSiteKey } from './password.js'
+import {canonicalRequire, canonicalSymbolSet} from "./profile-validation.js";
 
 /**
  * @param {string} masterPassword
@@ -14,7 +15,13 @@ export async function generatePassword(masterPassword, profile,  kdfOverrides = 
     throw new Error('Master password must not be empty')
   }
 
-  const context = encodeContext(profile)
+  const normalizedProfile = {
+    ...profile,
+    require: canonicalRequire(profile.require),
+    symbolSet: canonicalSymbolSet(profile.symbolSet)
+  }
+
+  const context = encodeContext(normalizedProfile)
   const siteKey = await deriveSiteKey(masterPassword, context, kdfOverrides)
   return generatePasswordFromSiteKey(siteKey, profile)
 }

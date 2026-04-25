@@ -8,7 +8,7 @@ describe('encodeContext', () => {
     const profile = makeProfile({
       counter: 1,
       length: 20,
-      symbolSet: '!#$%&*+-=?@^_'
+      symbolSet: '!#$%+-@^_'
     })
 
     const result = encodeContext(profile)
@@ -29,6 +29,20 @@ describe('encodeContext', () => {
     const b = encodeContext(profile)
 
     expect(Buffer.from(a)).toEqual(Buffer.from(b))
+  })
+
+  it('encodes equivalent symbolSet orderings identically', () => {
+    const a = makeProfile({ symbolSet: '!@#' })
+    const b = makeProfile({ symbolSet: '@!#' })
+
+    expect(encodeContext(a)).toStrictEqual(encodeContext(b))
+  })
+
+  it('encodes equivalent require orderings identically', () => {
+    const a = makeProfile({ require: ['symbol', 'lower', 'digit'] })
+    const b = makeProfile({ require: ['lower', 'digit', 'symbol'] })
+
+    expect(encodeContext(a)).toStrictEqual(encodeContext(b))
   })
 
   it('normalizes require order', () => {

@@ -61,7 +61,7 @@ describe('generatePassword (Golden test using production Argon2)', () => {
       counter: 42,
       length: 16,
       require: ['lower', 'upper', 'digit', 'symbol'],
-      symbolSet: '!@#{}[]()+-'
+      symbolSet: '@!#{}[]()+-'
     }
 
     const password = await generatePassword(
@@ -69,7 +69,6 @@ describe('generatePassword (Golden test using production Argon2)', () => {
       profile
     )
     // Golden test: if this changes, the derivation behavior changed.
-    expect(password).toBe('u)L]y5e}9X{WwUD)')
+    expect(password).toBe('3AGcdvd-FLDl4)ck')
   })
 })
-

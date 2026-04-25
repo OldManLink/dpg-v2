@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+# Fake editor for integration tests (CI-friendly)
+
+# First arg = name of edit result file to copy
+# Second arg = where to copy it to
+cat "integration/fake-edits/$1" > "$2"
+
+exit 0

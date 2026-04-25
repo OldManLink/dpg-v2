@@ -84,7 +84,7 @@ trap cleanup EXIT
 FAKE_BIN_DIR="$(mktemp -d)"
 
 cp "${SCRIPT_DIR}/fake-bin/xclip" "${FAKE_BIN_DIR}/xclip"
-chmod +x "${FAKE_BIN_DIR}/xclip"
+cp "${SCRIPT_DIR}/fake-bin/fake_ed" "${FAKE_BIN_DIR}/fake_ed"
 
 export PATH="${FAKE_BIN_DIR}:$PATH"
 
@@ -109,8 +109,16 @@ cp "${SCRIPT_DIR}/config.json" "$CONFIG_FILE"
 
 echo "Running integration tests..."
 echo
+START_TS=$(date +%s)
+START_TIME=$(date +"%H:%M:%S")
 
-while IFS= read -r line || [[ -n "$line" ]]; do
+exec 3< "${SCRIPT_DIR}/tests.tsv"
+
+# Skip header
+IFS= read -r _header <&3
+
+while IFS= read -r line <&3 || [[ -n "$line" ]]; do
+
 [[ -z "$line" || "$line" == \#* ]] && continue
 IFS=$'\t' read -r name cmd stdin expected_exit stdout_match expected_stdout stderr_match expected_stderr <<< "$line"
 
@@ -124,15 +132,16 @@ fi
 
   echo "→ $name"
 
-stdin_file="$(mktemp)"
 stdout_file="$(mktemp)"
 stderr_file="$(mktemp)"
 cmd="$(unescape "$cmd")"
 
 if [[ "$stdin" != "-" ]]; then
+stdin_file="$(mktemp)"
   printf '%s\n' "$(unescape "$stdin")" > "$stdin_file"
   eval "$cmd" < "$stdin_file" >"$stdout_file" 2>"$stderr_file"
   exit_code=$?
+  rm -f "$stdin_file"
 else
   eval "$cmd" >"$stdout_file" 2>"$stderr_file"
   exit_code=$?
@@ -141,7 +150,7 @@ fi
 stdout_content="$(cat "$stdout_file")"
 stderr_content="$(cat "$stderr_file")"
 
-rm -f "$stdin_file" "$stdout_file" "$stderr_file"
+rm -f "$stdout_file" "$stderr_file"
 
 if [[ "$exit_code" != "$expected_exit" ]]; then
   echo -e "${RED}FAIL${RESET}: expected exit $expected_exit, got $exit_code"
@@ -160,7 +169,7 @@ if ! match_output "$stdout_match" "$expected_stdout" "$stdout_content"; then
   echo "$expected_stdout"
   echo "Actual stdout:"
   echo "$stdout_content"
-  ((FAIL++))
+  FAIL=$((FAIL + 1))
   echo
   continue
 fi
@@ -177,12 +186,20 @@ if ! match_output "$stderr_match" "$expected_stderr" "$stderr_content"; then
 fi
 
 echo -e "${GREEN}PASS${RESET}"
-((PASS++))
+PASS=$((PASS + 1))
 echo
 
-done < <(tail -n +2 "${SCRIPT_DIR}/tests.tsv")
+done
+
+exec 3<&-
 
 echo "Summary: $PASS passed, $FAIL failed"
+
+END_TS=$(date +%s)
+DURATION=$(awk "BEGIN { printf \"%.2f\", $END_TS - $START_TS }")
+
+echo "   Start at  $START_TIME"
+echo "   Duration  ${DURATION}s"
 
 if [[ "$FAIL" -ne 0 ]]; then
   exit 1

@@ -10,6 +10,6 @@ describe('generatePassword (production Argon2)', () => {
     expect(password).toMatch(/[a-z]/)
     expect(password).toMatch(/[A-Z]/)
     expect(password).toMatch(/[0-9]/)
-    expect(password).toMatch(/[!@#]/)
+    expect(password).toMatch(/[@!#]/)
   })
 })

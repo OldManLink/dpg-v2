@@ -11,7 +11,7 @@ describe('generatePasswordFromSiteKey', () => {
     const password = generatePasswordFromSiteKey(fixedSiteKey(), makeProfile({
       length: 16,
       require: ['lower', 'upper', 'digit', 'symbol'],
-      symbolSet: '!@#'
+      symbolSet: '@!#'
     }))
 
     expect(password).toHaveLength(16)
@@ -21,7 +21,7 @@ describe('generatePasswordFromSiteKey', () => {
     const profile = makeProfile({
       length: 20,
       require: ['lower', 'upper', 'digit', 'symbol'],
-      symbolSet: '!@#'
+      symbolSet: '@!#'
     })
 
     const a = generatePasswordFromSiteKey(fixedSiteKey(), profile)
@@ -34,20 +34,20 @@ describe('generatePasswordFromSiteKey', () => {
     const password = generatePasswordFromSiteKey(fixedSiteKey(), makeProfile({
       length: 24,
       require: ['lower', 'upper', 'digit', 'symbol'],
-      symbolSet: '!@#'
+      symbolSet: '@!#'
     }))
 
     expect(password).toMatch(/[a-z]/)
     expect(password).toMatch(/[A-Z]/)
     expect(password).toMatch(/[0-9]/)
-    expect(password).toMatch(/[!@#]/)
+    expect(password).toMatch(/[@!#]/)
   })
 
   it('uses only allowed characters', () => {
     const password = generatePasswordFromSiteKey(fixedSiteKey(), makeProfile({
       length: 50,
       require: ['lower', 'digit'],
-      symbolSet: '!@#'
+      symbolSet: '@!#'
     }))
 
     expect(password).toMatch(/^[a-z0-9]+$/)
@@ -58,7 +58,7 @@ describe('generatePasswordFromSiteKey', () => {
       generatePasswordFromSiteKey(fixedSiteKey(), makeProfile({
         length: 2,
         require: ['lower', 'upper', 'digit'],
-        symbolSet: '!@#'
+        symbolSet: '@!#'
       }))
     ).toThrow(/length/i)
   })
@@ -68,7 +68,7 @@ describe('generatePasswordFromSiteKey', () => {
       generatePasswordFromSiteKey(fixedSiteKey(), makeProfile({
         length: 10,
         require: [],
-        symbolSet: '!@#'
+        symbolSet: '@!#'
       }))
     ).toThrow(/character class|alphabet/i)
   })
@@ -80,7 +80,7 @@ describe('generatePasswordFromSiteKey', () => {
         length: 10,
         // @ts-ignore - intentional invalid RequireClass to test runtime validation
         require: ['runes', 'lower'],
-        symbolSet: '!@#'
+        symbolSet: '@!#'
       }))
     ).toThrow(/unknown/i)
   })

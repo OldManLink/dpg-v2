@@ -1,9 +1,9 @@
-import { validateProfileLabel } from './profile-validation.js'
+import {canonicalSymbolSet, REQUIRE_CLASS_ORDER, validateProfileLabel} from './profile-validation.js'
 /** @typedef {import('./models.js').RequireClass} RequireClass */
 
 /** @type RequireClass[] */
-export const DEFAULT_REQUIRE = ['lower', 'upper', 'digit', 'symbol']
-export const DEFAULT_SYMBOL_SET = '!@#'
+export const DEFAULT_REQUIRE = [...REQUIRE_CLASS_ORDER]
+export const DEFAULT_SYMBOL_SET = canonicalSymbolSet('@!#')
 
 /**
  * @param {string} label

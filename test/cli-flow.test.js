@@ -113,18 +113,20 @@ describe('runCli', () => {
 
   it('new profile is visible in list output', async () => {
     const created = createDefaultProfile('github-main', '2026-04-14T12:00:00.000Z')
+    const repoMock = profilesRepositoryClassMock([created])
     const stdout = { write: vi.fn() }
 
     const exitCode = await runCli(
       makeCliArgs({ list: true }),
       {
-        loadAllProfiles: async () => [created],
+        ProfilesRepositoryClass: repoMock,
         stdout,
         stderr: { write: vi.fn() }
       }
     )
 
     expect(exitCode).toBe(0)
+    expect(repoMock.load).toHaveBeenCalled()
     expect(stdout.write).toHaveBeenCalledWith(expect.stringMatching(/github-main/))
   })
 

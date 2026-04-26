@@ -1,24 +1,21 @@
 import {it, expect, describe} from 'vitest'
 import {ProfilesRepository} from "../src/profiles-repository.js";
-import {loadAllProfiles} from "../src/profiles-file.js";
 import {makeProfile} from "./fixtures/profiles.js";
 /** @typedef {import('../src/models.js').Profile} Profile */
+
+const loadAllProfiles = async () => [makeProfile({label: 'github-main'})]
 
 describe('ProfilesRepository methods', () => {
   it('loads profiles and lists them', async () => {
     const repo = await ProfilesRepository.load({loadAllProfiles})
 
-    const profiles = repo.list()
-
-    expect(profiles.length).toBeGreaterThan(0)
+    expect(repo.list()).toHaveLength(1)
   })
 
   it('returns profile by label', async () => {
     const repo = await ProfilesRepository.load({loadAllProfiles})
 
-    const profile = repo.get('github-main')
-
-    expect(profile.label).toBe('github-main')
+    expect(repo.get('github-main')?.label).toBe('github-main')
   })
 
   it('creates a new profile', async () => {
@@ -32,11 +29,9 @@ describe('ProfilesRepository methods', () => {
   it('replaces an existing profile', async () => {
     const repo = await ProfilesRepository.load({loadAllProfiles})
 
-    const updated = makeProfile({label: 'github-main', counter: 42})
+    repo.replace(makeProfile({label: 'github-main', counter: 42}))
 
-    repo.replace(updated)
-
-    expect(repo.get('github-main').counter).toBe(42)
+    expect(repo.get('github-main')?.counter).toBe(42)
   })
 
   it('deletes a profile', async () => {

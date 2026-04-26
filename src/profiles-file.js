@@ -21,49 +21,6 @@ export function resolveProfilesPath(options = {}) {
   }
 }
 
-/**
- * @param {unknown} profiles
- * @param {string} label
- * @returns {any}
- */
-export function findProfileByLabel(profiles, label) {
-  if (!Array.isArray(profiles)) {
-    throw new Error('Profiles file must contain a JSON array')
-  }
-
-  const match = profiles.find(profile => profile?.label === label)
-  if (!match) {
-    throw new Error(`Profile not found: ${label}`)
-  }
-
-  return match
-}
-
-/**
- * @param {string} label
- * @param {{ profilesPath?: string }=} options
- * @returns {Promise<any>}
- */
-export async function loadProfileByLabel(label, options = {}) {
-  const profilesPath = options.profilesPath ?? resolveProfilesPath()
-  let text
-
-  try {
-    text = await fs.readFile(profilesPath, 'utf8')
-  } catch (error) {
-    throw new Error(`Profiles file not found: ${profilesPath}`)
-  }
-
-  let parsed
-  try {
-    parsed = JSON.parse(text)
-  } catch (error) {
-    throw new Error(`Profiles file is not valid JSON: ${profilesPath}`)
-  }
-
-  return findProfileByLabel(parsed, label)
-}
-
 export async function loadAllProfiles(options = {}) {
   const profilesPath = options.profilesPath ?? resolveProfilesPath()
 

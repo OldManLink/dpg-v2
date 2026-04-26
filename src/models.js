@@ -64,9 +64,6 @@
 
 /**
  * @typedef {{
- *   loadProfileByLabel?: (label: string) => Promise<Profile>,
- *   loadAllProfiles?: () => Promise<Profile[]>,
- *   saveProfiles?: (profiles: Profile[]) => Promise<void>,
  *   promptForMasterPassword?: () => Promise<string>,
  *   promptForConfirmation?: (prompt: string) => Promise<string>,
  *   generatePassword?: (master: string, profile: Profile) => Promise<string>,
@@ -77,6 +74,7 @@
  *   openInEditor?: (editor: string, filePath: string) => Promise<number>,
  *   loadConfig?: () => Promise<Config>,
  *   saveConfig?: (config: Config) => Promise<void>,
+ *   ProfilesRepositoryClass?: ProfilesRepositoryFactory,
  *   stdout?: { write: (s: string) => void },
  *   stderr?: { write: (s: string) => void }
  * }} CliDeps
@@ -112,6 +110,22 @@
 
 /**
  * @typedef {typeof import('node:child_process').spawn} EditorSpawn
+ */
+
+/**
+ * @typedef {{
+ *   load: (deps?: {
+ *     loadAllProfiles?: () => Promise<Profile[]>,
+ *     saveProfiles?: (profiles: Profile[]) => Promise<void>
+ *   }) => Promise<{
+ *     list: () => Profile[],
+ *     get: (label: string) => Profile | null,
+ *     delete: (label: string) => void,
+ *     create: (profile: Profile) => void
+ *     replace: (profile: Profile) => void
+ *     persist: () => Promise<void>
+ *   }>
+ * }} ProfilesRepositoryFactory
  */
 
 export {}

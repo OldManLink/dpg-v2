@@ -28,7 +28,7 @@ config-show-editor-with-args	dpg-cli --config	-	0	contains	\qeditor\q: \qvi -f\q
 
 show-profile	dpg-cli --show-profile github-main	-	0	contains	\qlabel\q: \qgithub-main\q	exact	-
 
-edit-missing	dpg-cli --edit foobar	-	1	exact	-	contains	Profile not found: foobar
+edit-missing	dpg-cli --edit foobar	-	1	exact	-	contains	Profile not found: 'foobar'
 
 create-reqsym	dpg-cli --new reqsym	-	0	exact	Created profile: 'reqsym'	exact	-
 

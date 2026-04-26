@@ -9,11 +9,9 @@ import { serializeProfilePretty } from './profile-serialization.js'
 import { formatProfileList } from './list-formatting.js'
 import { loadConfig, saveConfig, parseConfigAssignment, applyConfigUpdate } from "./config-file.js";
 import { readTempFile, writeTempFile, deleteTempFile, openInEditor } from "./editor.js"
-import {
-  diffChangedEditableFields,
-  extractEditableProfileFields,
-  mergeEditableProfileFields, validateEditableProfileFields
-} from "./editable-profile.js";
+import { diffChangedEditableFields, extractEditableProfileFields, mergeEditableProfileFields,
+  validateEditableProfileFields} from "./editable-profile.js";
+import { ProfilesRepository } from './profiles-repository.js'
 /** @typedef {import('./models.js').CliDeps} CliDeps */
 /** @typedef {import('./models.js').CliArgs} CliArgs */
 
@@ -37,6 +35,7 @@ export async function runCli(args, deps = {}) {
     openInEditor: openEditor = openInEditor,
     loadConfig: loadCfg = loadConfig,
     saveConfig: saveCfg = saveConfig,
+    ProfilesRepositoryClass = ProfilesRepository,
     stdout = process.stdout,
     stderr = process.stderr
   } = deps
@@ -50,11 +49,13 @@ export async function runCli(args, deps = {}) {
     checkForConflicts(args)
 
     if (args.list) {
-      const profiles = await loadAll()
-      const config = await loadCfg()
-      stdout.write(formatProfileList(profiles, config.sortBy) + '\n')
-      return 0
-    }
+      const repo = await ProfilesRepositoryClass.load({
+        loadAllProfiles,
+        saveProfiles
+      })
+
+      stdout.write(formatProfileList(repo.list()) + '\n')
+      return 0    }
 
     if (args.bump) {
       const profile = await load(args.bump)
@@ -211,8 +212,19 @@ export async function runCli(args, deps = {}) {
     }
 
     if (args.showProfileLabel) {
-      const profile = await load(args.showProfileLabel)
-      stdout.write(serializeProfilePretty(profile) + '\n')
+      const repo = await ProfilesRepositoryClass.load({
+        loadAllProfiles,
+        saveProfiles
+      })
+
+      const profile = repo.get(args.showProfileLabel)
+
+      if (!profile) {
+        stderr.write(`Profile '${args.showProfileLabel}' does not exist\n`)
+        return 1
+      }
+
+      stdout.write(`${serializeProfilePretty(profile)}\n`)
       return 0
     }
 
@@ -232,7 +244,18 @@ export async function runCli(args, deps = {}) {
       return 0
     }
 
-    const profile = await load(args.profileLabel)
+    const repo = await ProfilesRepositoryClass.load({
+      loadAllProfiles,
+      saveProfiles
+    })
+
+    const profile = repo.get(args.profileLabel)
+
+    if (!profile) {
+      stderr.write(`Profile not found: '${args.profileLabel}'\n`)
+      return 1
+    }
+
     const masterPassword = await prompt()
     const password = await generate(masterPassword, profile)
 

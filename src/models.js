@@ -77,6 +77,7 @@
  *   openInEditor?: (editor: string, filePath: string) => Promise<number>,
  *   loadConfig?: () => Promise<Config>,
  *   saveConfig?: (config: Config) => Promise<void>,
+ *   ProfilesRepositoryClass?: ProfilesRepositoryFactory,
  *   stdout?: { write: (s: string) => void },
  *   stderr?: { write: (s: string) => void }
  * }} CliDeps
@@ -112,6 +113,18 @@
 
 /**
  * @typedef {typeof import('node:child_process').spawn} EditorSpawn
+ */
+
+/**
+ * @typedef {{
+ *   load: (deps?: {
+ *     loadAllProfiles?: () => Promise<Profile[]>,
+ *     saveProfiles?: (profiles: Profile[]) => Promise<void>
+ *   }) => Promise<{
+ *     list: () => Profile[],
+ *     get: (label: string) => Profile | null
+ *   }>
+ * }} ProfilesRepositoryFactory
  */
 
 export {}

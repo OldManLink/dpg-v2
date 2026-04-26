@@ -18,7 +18,7 @@ This is not a general-purpose test framework.
 
 It is a **small, purpose-built DSL** for testing CLI behavior with minimal ceremony and maximum clarity.
 
-> Prefer clarity over cleverness, and explicit behavior over implicit magic.
+> Prefer clarity to cleverness, and explicit behavior over implicit magic.
 
 ---
 
@@ -26,7 +26,7 @@ It is a **small, purpose-built DSL** for testing CLI behavior with minimal cerem
 
 Each test is a single TSV row with the following columns:
 
-| Column            | Description                                  |
+| Column           | Description                                  |
 |------------------|----------------------------------------------|
 | name             | Unique test identifier                       |
 | command          | CLI command to execute                       |
@@ -64,14 +64,21 @@ contains	\qsortBy\q: \qlabel\q
 
 This will be interpreted by the harness as:
 
-```json
-"sortBy": "label"
+```markdown
+..."sortBy": "label"...
 ```
 
 Multiline example:
 
 ```
 exact	line1\nline2
+```
+
+This will be interpreted by the harness as:
+
+```markdown
+line1
+line2
 ```
 
 ---

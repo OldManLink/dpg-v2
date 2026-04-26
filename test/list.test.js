@@ -2,6 +2,7 @@ import { describe, it, expect, vi } from 'vitest'
 import { runCli } from '../src/cli-runner.js'
 import { makeProfile } from './fixtures/profiles.js'
 import { makeCliArgs } from './fixtures/cli.js'
+import { profilesRepositoryClassMock } from './mocks/profiles-repository.js'
 
 describe('list command', () => {
   it('prints all profiles in sorted order', async () => {
@@ -15,7 +16,7 @@ describe('list command', () => {
     const exitCode = await runCli(
       makeCliArgs({ list: true }),
       {
-        loadAllProfiles: async () => profiles,
+        ProfilesRepositoryClass: profilesRepositoryClassMock(profiles),
         stdout,
         stderr: { write: vi.fn() }
       }
@@ -36,7 +37,7 @@ describe('list command', () => {
     const exitCode = await runCli(
       makeCliArgs({ list: true }),
       {
-        loadAllProfiles: async () => [],
+        ProfilesRepositoryClass: profilesRepositoryClassMock([]),
         stdout,
         stderr: { write: vi.fn() }
       }

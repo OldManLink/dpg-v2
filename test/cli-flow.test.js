@@ -9,6 +9,7 @@ import {tmpdir} from "node:os";
 import {loadAllProfiles, saveProfiles} from "../src/profiles-file.js";
 import { makeConfig } from './fixtures/config.js'
 import {openInEditor} from "../src/editor.js";
+import {profilesRepositoryClassMock} from "./mocks/profiles-repository.js";
 /** @typedef {import('../src/models.js').Profile} Profile */
 /** @typedef {import('../src/models.js').Config} Config */
 /** @typedef {import('../src/models.js').EditorSpawn} EditorSpawn */
@@ -16,7 +17,7 @@ import {openInEditor} from "../src/editor.js";
 
 describe('runCli', () => {
   it('loads profile, prompts for password, generates, copies, and prints success', async () => {
-    const loadProfileByLabel = vi.fn(async () => DEFAULT_PROFILE)
+    const repoMock = profilesRepositoryClassMock([DEFAULT_PROFILE])
     const promptForMasterPassword = vi.fn(async () => 'master')
     const generatePassword = vi.fn(async () => 'generated-secret')
     const copyToClipboard = vi.fn(async () => {})
@@ -26,17 +27,17 @@ describe('runCli', () => {
     const exitCode = await runCli(
       makeCliArgs({ profileLabel: 'github-main', show: false, help: false }),
       {
-        loadProfileByLabel,
         promptForMasterPassword,
         generatePassword,
         copyToClipboard,
+        ProfilesRepositoryClass: repoMock,
         stdout,
         stderr
       }
     )
 
     expect(exitCode).toBe(0)
-    expect(loadProfileByLabel).toHaveBeenCalledWith('github-main')
+    expect(repoMock.load).toHaveBeenCalled()
     expect(promptForMasterPassword).toHaveBeenCalled()
     expect(generatePassword).toHaveBeenCalledWith('master', DEFAULT_PROFILE)
     expect(copyToClipboard).toHaveBeenCalledWith('generated-secret')
@@ -45,11 +46,12 @@ describe('runCli', () => {
 
   it('prints password when --show is used', async () => {
     const stdout = { write: vi.fn() }
+    const repoMock = profilesRepositoryClassMock([DEFAULT_PROFILE])
 
     const exitCode = await runCli(
       makeCliArgs({ profileLabel: 'github-main', show: true, help: false }),
       {
-        loadProfileByLabel: async () => DEFAULT_PROFILE,
+        ProfilesRepositoryClass: repoMock,
         promptForMasterPassword: async () => 'master',
         generatePassword: async () => 'generated-secret',
         copyToClipboard: async () => {},
@@ -59,6 +61,7 @@ describe('runCli', () => {
     )
 
     expect(exitCode).toBe(0)
+    expect(repoMock.load).toHaveBeenCalled()
     expect(stdout.write).toHaveBeenCalledWith(expect.stringContaining('generated-secret'))
   })
 
@@ -142,13 +145,12 @@ describe('runCli', () => {
 
   it('prints error and exits 1 on failure', async () => {
     const stderr = { write: vi.fn() }
+    const repoMock = profilesRepositoryClassMock([DEFAULT_PROFILE])
 
     const exitCode = await runCli(
       makeCliArgs({ profileLabel: 'missing', show: false, help: false }),
       {
-        loadProfileByLabel: async () => {
-          throw new Error('Profile not found: missing')
-        },
+        ProfilesRepositoryClass: repoMock,
         promptForMasterPassword: async () => 'master',
         generatePassword: async () => 'generated-secret',
         copyToClipboard: async () => {},
@@ -158,6 +160,7 @@ describe('runCli', () => {
     )
 
     expect(exitCode).toBe(1)
+    expect(repoMock.load).toHaveBeenCalled()
     expect(stderr.write).toHaveBeenCalledWith(expect.stringMatching(/profile not found/i))
   })
 
@@ -258,7 +261,7 @@ describe('runCli', () => {
     const exitCode = await runCli(
       makeCliArgs({ list: true }),
       {
-        loadAllProfiles: async () => [],
+        ProfilesRepositoryClass: profilesRepositoryClassMock([]),
         stdout,
         stderr: { write: vi.fn() }
       }
@@ -425,7 +428,7 @@ describe('runCli', () => {
     const exitCode = await runCli(
       makeCliArgs({ showProfileLabel: 'github-main' }),
       {
-        loadProfileByLabel: async () => profile,
+        ProfilesRepositoryClass: profilesRepositoryClassMock([profile]),
         stdout,
         stderr: { write: vi.fn() }
       }
@@ -443,18 +446,18 @@ describe('runCli', () => {
 
   it('fails when --show-profile target does not exist', async () => {
     const stderr = { write: vi.fn() }
+    const repoMock = profilesRepositoryClassMock([])
 
     const exitCode = await runCli(
       makeCliArgs({ showProfileLabel: 'nope' }),
       {
-        loadProfileByLabel: async () => {
-          throw new Error("Profile 'nope' does not exist")
-        },
+        ProfilesRepositoryClass: repoMock,
         stdout: { write: vi.fn() },
         stderr
       }
     )
 
+    expect(repoMock.load).toHaveBeenCalled()
     expect(stderr.write).toHaveBeenCalledWith(expect.stringMatching(/does not exist/i))
     expect(exitCode).toBe(1)
   })

@@ -1,15 +1,15 @@
 import { describe, it, expect, vi } from 'vitest'
 import { runCli } from '../src/cli-runner.js'
-import {DEFAULT_PROFILE, makeProfile} from './fixtures/profiles.js'
+import { DEFAULT_PROFILE, makeProfile } from './fixtures/profiles.js'
 import { makeCliArgs } from './fixtures/cli.js'
-import {createDefaultProfile} from "../src/profile-factory.js";
+import { createDefaultProfile } from "../src/profile-factory.js";
 import fs from 'node:fs/promises'
 import path from "node:path";
-import {tmpdir} from "node:os";
-import {loadAllProfiles, saveProfiles} from "../src/profiles-file.js";
+import { tmpdir } from "node:os";
+import { loadAllProfiles, saveProfiles } from "../src/profiles-file.js";
 import { makeConfig } from './fixtures/config.js'
-import {openInEditor} from "../src/editor.js";
-import {profilesRepositoryClassMock} from "./mocks/profiles-repository.js";
+import { openInEditor } from "../src/editor.js";
+import { profilesRepositoryClassMock } from "./mocks/profiles-repository.js";
 /** @typedef {import('../src/models.js').Profile} Profile */
 /** @typedef {import('../src/models.js').Config} Config */
 /** @typedef {import('../src/models.js').EditorSpawn} EditorSpawn */
@@ -305,17 +305,14 @@ describe('runCli', () => {
       makeProfile({ label: 'github-main' }),
       makeProfile({ label: 'gitlab-main', service: 'gitlab.com' })
     ]
-
-    /** @type Profile[] */
-    let savedProfiles = null
+    const repoMock = profilesRepositoryClassMock(profiles)
 
     const stdout = { write: vi.fn() }
 
     const exitCode = await runCli(
       makeCliArgs({ deleteLabel: 'github-main' }),
       {
-        loadAllProfiles: async () => profiles,
-        saveProfiles: async p => { savedProfiles = p },
+        ProfilesRepositoryClass: repoMock,
         promptForConfirmation: async () => 'y',
         stdout,
         stderr: { write: vi.fn() }
@@ -323,25 +320,22 @@ describe('runCli', () => {
     )
 
     expect(exitCode).toBe(0)
-    expect(savedProfiles).not.toBeNull()
-
-    if (!savedProfiles) throw new Error('not saved')
-
-    expect(savedProfiles).toHaveLength(1)
-    expect(savedProfiles[0].label).toBe('gitlab-main')
+    expect(repoMock.repo.delete).toHaveBeenCalledWith('github-main')
+    expect(repoMock.repo.persist).toHaveBeenCalled()
+    expect(repoMock.repo.list()).toHaveLength(1)
+    expect(repoMock.repo.list()[0].label).toBe('gitlab-main')
     expect(stdout.write).toHaveBeenCalledWith("Deleted profile: 'github-main'\n")
   })
 
   it('cancels deletion on default response', async () => {
     const profiles = [makeProfile({ label: 'github-main' })]
-    let saveCalled = false
+    const repoMock = profilesRepositoryClassMock(profiles)
     const stdout = { write: vi.fn() }
 
     const exitCode = await runCli(
       makeCliArgs({ deleteLabel: 'github-main' }),
       {
-        loadAllProfiles: async () => profiles,
-        saveProfiles: async () => { saveCalled = true },
+        ProfilesRepositoryClass: repoMock,
         promptForConfirmation: async () => '',
         stdout,
         stderr: { write: vi.fn() }
@@ -349,20 +343,20 @@ describe('runCli', () => {
     )
 
     expect(exitCode).toBe(0)
-    expect(saveCalled).toBe(false)
+    expect(repoMock.repo.list()).toHaveLength(1)
+    expect(repoMock.repo.persist).not.toHaveBeenCalled()
     expect(stdout.write).toHaveBeenCalledWith('Cancelled\n')
   })
 
   it('cancels deletion on non-y response', async () => {
     const profiles = [makeProfile({ label: 'github-main' })]
-    let saveCalled = false
+    const repoMock = profilesRepositoryClassMock(profiles)
     const stdout = { write: vi.fn() }
 
     const exitCode = await runCli(
       makeCliArgs({ deleteLabel: 'github-main' }),
       {
-        loadAllProfiles: async () => profiles,
-        saveProfiles: async () => { saveCalled = true },
+        ProfilesRepositoryClass: repoMock,
         promptForConfirmation: async () => 'n',
         stdout,
         stderr: { write: vi.fn() }
@@ -370,17 +364,20 @@ describe('runCli', () => {
     )
 
     expect(exitCode).toBe(0)
-    expect(saveCalled).toBe(false)
+    expect(repoMock.repo.list()).toHaveLength(1)
+    expect(repoMock.repo.persist).not.toHaveBeenCalled()
     expect(stdout.write).toHaveBeenCalledWith('Cancelled\n')
   })
 
   it('fails when deleting a non-existent profile', async () => {
+    const profiles = [makeProfile({ label: 'github-main' })]
+    const repoMock = profilesRepositoryClassMock(profiles)
     const stderr = { write: vi.fn() }
 
     const exitCode = await runCli(
       makeCliArgs({ deleteLabel: 'missing' }),
       {
-        loadAllProfiles: async () => [makeProfile({ label: 'github-main' })],
+        ProfilesRepositoryClass: repoMock,
         promptForConfirmation: async () => 'y',
         stdout: { write: vi.fn() },
         stderr
@@ -388,25 +385,29 @@ describe('runCli', () => {
     )
 
     expect(exitCode).toBe(1)
+    expect(repoMock.repo.list()).toHaveLength(1)
+    expect(repoMock.repo.persist).not.toHaveBeenCalled()
     expect(stderr.write).toHaveBeenCalledWith(expect.stringMatching(/does not exist/i))
   })
 
   it('does not report deletion if save fails after confirmation', async () => {
     const profiles = [
-      makeProfile({ label: 'github-main' }),
-      makeProfile({ label: 'gitlab-main', service: 'gitlab.com' })
+      makeProfile({label: 'github-main'}),
+      makeProfile({label: 'gitlab-main', service: 'gitlab.com'})
     ]
+    const repoMock = profilesRepositoryClassMock(profiles, {
+      persist: vi.fn(async () => {
+        throw new Error('disk full')
+      })
+    })
 
-    const stdout = { write: vi.fn() }
-    const stderr = { write: vi.fn() }
+    const stdout = {write: vi.fn()}
+    const stderr = {write: vi.fn()}
 
     const exitCode = await runCli(
-      makeCliArgs({ deleteLabel: 'github-main' }),
+      makeCliArgs({deleteLabel: 'github-main'}),
       {
-        loadAllProfiles: async () => profiles,
-        saveProfiles: async () => {
-          throw new Error('disk full')
-        },
+        ProfilesRepositoryClass: repoMock,
         promptForConfirmation: async () => 'y',
         stdout,
         stderr
@@ -414,25 +415,22 @@ describe('runCli', () => {
     )
 
     expect(exitCode).toBe(1)
-
-    const out = stdout.write.mock.calls.map(c => c[0]).join('')
-    expect(out).not.toMatch(/Deleted profile/i)
-
-    expect(stderr.write).toHaveBeenCalledWith(
-      expect.stringMatching(/disk full/i)
-    )
+    expect(repoMock.repo.delete).toHaveBeenCalled()
+    expect(repoMock.repo.persist).toHaveBeenCalled()
+    expect(stdout.write).not.toHaveBeenCalledWith(expect.stringContaining('Deleted profile'))
+    expect(stderr.write).toHaveBeenCalledWith(expect.stringMatching(/disk full/i))
   })
 
   it('shows an existing profile as pretty-printed JSON', async () => {
-    const profile = makeProfile({ label: 'github-main', service: 'github.com' })
-    const stdout = { write: vi.fn() }
+    const profile = makeProfile({label: 'github-main', service: 'github.com'})
+    const stdout = {write: vi.fn()}
 
     const exitCode = await runCli(
-      makeCliArgs({ showProfileLabel: 'github-main' }),
+      makeCliArgs({showProfileLabel: 'github-main'}),
       {
         ProfilesRepositoryClass: profilesRepositoryClassMock([profile]),
         stdout,
-        stderr: { write: vi.fn() }
+        stderr: {write: vi.fn()}
       }
     )
 
@@ -447,14 +445,14 @@ describe('runCli', () => {
   })
 
   it('fails when --show-profile target does not exist', async () => {
-    const stderr = { write: vi.fn() }
+    const stderr = {write: vi.fn()}
     const repoMock = profilesRepositoryClassMock([])
 
     const exitCode = await runCli(
-      makeCliArgs({ showProfileLabel: 'nope' }),
+      makeCliArgs({showProfileLabel: 'nope'}),
       {
         ProfilesRepositoryClass: repoMock,
-        stdout: { write: vi.fn() },
+        stdout: {write: vi.fn()},
         stderr
       }
     )

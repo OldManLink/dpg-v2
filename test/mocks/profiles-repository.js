@@ -5,32 +5,44 @@ import { vi } from 'vitest'
 
 /**
  * @param {Profile[]} initialProfiles
- * @returns {ProfilesRepositoryFactory & { load: import('vitest').Mock }}
+ * @param {Partial<{
+ *   create: Function,
+ *   replace: Function,
+ *   delete: Function,
+ *   persist: Function
+ * }>} [overrides]
+ * @returns {ProfilesRepositoryFactory & { load: import('vitest').Mock, repo: any }}
  */
-export function profilesRepositoryClassMock(initialProfiles) {
+export function profilesRepositoryClassMock(initialProfiles, overrides = {}) {
   let profiles = [...initialProfiles]
 
+  const repo = {
+    list: () => [...profiles],
+
+    get: (/** @type {string} */ label) =>
+      profiles.find(p => p.label === label) ?? null,
+
+    create: vi.fn(profile => {
+      profiles.push(profile)
+    }),
+
+    replace: vi.fn(profile => {
+      const i = profiles.findIndex(p => p.label === profile.label)
+      if (i !== -1) profiles[i] = profile
+    }),
+
+    delete: vi.fn(label => {
+      profiles = profiles.filter(p => p.label !== label)
+    }),
+
+    persist: vi.fn(async () => {
+    }),
+
+    ...overrides
+  }
+
   return {
-    load: vi.fn(async () => ({
-      list: () => [...profiles],
-
-      get: (/** @type {string} */ label) =>
-        profiles.find(p => p.label === label) ?? null,
-
-      create: (profile) => {
-        profiles.push(profile)
-      },
-
-      replace: (profile) => {
-        const i = profiles.findIndex(p => p.label === profile.label)
-        if (i !== -1) profiles[i] = profile
-      },
-
-      delete: (/** @type {string} */ label) => {
-        profiles = profiles.filter(p => p.label !== label)
-      },
-
-      persist: vi.fn(async () => {})
-    }))
+    load: vi.fn(async () => repo),
+    repo
   }
 }

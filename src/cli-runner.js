@@ -50,8 +50,8 @@ export async function runCli(args, deps = {}) {
 
     if (args.list) {
       const repo = await ProfilesRepositoryClass.load({
-        loadAllProfiles,
-        saveProfiles
+        loadAllProfiles: loadAll,
+        saveProfiles: save
       })
 
       stdout.write(formatProfileList(repo.list()) + '\n')
@@ -187,10 +187,14 @@ export async function runCli(args, deps = {}) {
     }
 
     if (args.deleteLabel) {
-      const all = await loadAll()
-      const existing = all.find(p => p.label === args.deleteLabel)
+      const repo = await ProfilesRepositoryClass.load({
+        loadAllProfiles: loadAll,
+        saveProfiles: save
+      })
 
-      if (!existing) {
+      const profile = repo.get(args.deleteLabel)
+
+      if (!profile) {
         stderr.write(`Profile does not exist: '${args.deleteLabel}'\n`)
         return 1
       }
@@ -204,8 +208,8 @@ export async function runCli(args, deps = {}) {
         return 0
       }
 
-      const remaining = all.filter(p => p.label !== args.deleteLabel)
-      await save(remaining)
+      repo.delete(args.deleteLabel)
+      await repo.persist()
 
       stdout.write(`Deleted profile: '${args.deleteLabel}'\n`)
       return 0
@@ -213,8 +217,8 @@ export async function runCli(args, deps = {}) {
 
     if (args.showProfileLabel) {
       const repo = await ProfilesRepositoryClass.load({
-        loadAllProfiles,
-        saveProfiles
+        loadAllProfiles: loadAll,
+        saveProfiles: save
       })
 
       const profile = repo.get(args.showProfileLabel)
@@ -245,8 +249,8 @@ export async function runCli(args, deps = {}) {
     }
 
     const repo = await ProfilesRepositoryClass.load({
-      loadAllProfiles,
-      saveProfiles
+      loadAllProfiles: loadAll,
+      saveProfiles: save
     })
 
     const profile = repo.get(args.profileLabel)

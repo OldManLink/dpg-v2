@@ -122,7 +122,9 @@
  *     saveProfiles?: (profiles: Profile[]) => Promise<void>
  *   }) => Promise<{
  *     list: () => Profile[],
- *     get: (label: string) => Profile | null
+ *     get: (label: string) => Profile | null,
+ *     delete: (label: string) => void,
+ *     persist: () => Promise<void>
  *   }>
  * }} ProfilesRepositoryFactory
  */

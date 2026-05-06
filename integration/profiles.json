@@ -11,5 +11,21 @@
     "notes":"Integration test profile",
     "createdAt":"2026-04-20T00:00:00.000Z",
     "updatedAt":"2026-04-20T00:00:00.000Z"
+  },
+  {
+    "version":"dpg:v2",
+    "label": "dupe-a",
+    "service": "duplicate.example",
+    "account": "",
+    "counter": 1,
+    "require":["lower","digit"]
+  },
+  {
+    "version":"dpg:v2",
+    "label": "dupe-b",
+    "service": "duplicate.example",
+    "account": "",
+    "counter": 1,
+    "require":["lower","digit"]
   }
 ]

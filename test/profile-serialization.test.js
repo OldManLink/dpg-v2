@@ -16,7 +16,8 @@ describe('serializeProfilePretty', () => {
   it('serializes all present fields in stable order', () => {
     const profile = makeProfile({
       account: 'peter@example.com',
-      notes: 'Main account'
+      notes: 'Main account',
+      ctxHash: 'AmazingHash'
     })
 
     const text = serializeProfilePretty(profile)
@@ -35,7 +36,8 @@ describe('serializeProfilePretty', () => {
       'symbolSet',
       'notes',
       'createdAt',
-      'updatedAt'
+      'updatedAt',
+      'ctxHash'
     ])
   })
 

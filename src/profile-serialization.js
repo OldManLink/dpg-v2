@@ -10,7 +10,8 @@ const PROFILE_FIELD_ORDER = [
   'symbolSet',
   'notes',
   'createdAt',
-  'updatedAt'
+  'updatedAt',
+  'ctxHash'
 ]
 
 /**

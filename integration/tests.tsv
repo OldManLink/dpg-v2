@@ -1,10 +1,14 @@
 name	command	stdin	expected_exit	stdout_match	expected_stdout	stderr_match	expected_stderr
 
+duplicate-warning-list	dpg-cli --list	-	0	contains	dupe-a	contains	Warning: profiles derive the same password: dupe-a, dupe-b
+duplicate-warning-show-profile	dpg-cli --show-profile dupe-a	-	0	contains	\qlabel\q: \qdupe-a\q	contains	Warning: profiles derive the same password: dupe-a, dupe-b
+duplicate-resolved-by-bump	dpg-cli -b dupe-b --save	password123	0	contains	(saved)	exact	-
+
 quote-escape	dpg-cli --config	-	0	contains	\qsortBy\q: \qlabel\q	exact	-
 show-help	dpg-cli -h	-	0	contains	Usage	exact	-
 
 list-nonempty	dpg-cli --list	-	0	contains	github-main	exact	-
-list-exact	dpg-cli --list	-	0	exact	label        counter\ngithub-main  4	exact	-
+list-exact	dpg-cli --list	-	0	exact	label        counter\ndupe-a       1\ndupe-b       1\ngithub-main  4	exact	-
 
 missing-command	dpg-cli	-	1	exact	-	exact	No command specified. See -h for help.
 unknown-flag	dpg-cli --shwo	-	1	exact	-	exact	Unknown argument: --shwo

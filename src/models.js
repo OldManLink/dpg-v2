@@ -22,7 +22,8 @@
  *   symbolSet?: string,
  *   notes?: string,
  *   createdAt?: string,
- *   updatedAt?: string
+ *   updatedAt?: string,
+ *   ctxHash:? string
  * }} Profile
  */
 

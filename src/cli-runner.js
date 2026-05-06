@@ -1,4 +1,3 @@
-import { loadProfileByLabel, saveProfiles, loadAllProfiles } from './profiles-file.js'
 import { createDefaultProfile } from './profile-factory.js'
 import { promptForMasterPassword } from './prompt.js'
 import { generatePassword } from './generate.js'
@@ -9,11 +8,9 @@ import { serializeProfilePretty } from './profile-serialization.js'
 import { formatProfileList } from './list-formatting.js'
 import { loadConfig, saveConfig, parseConfigAssignment, applyConfigUpdate } from "./config-file.js";
 import { readTempFile, writeTempFile, deleteTempFile, openInEditor } from "./editor.js"
-import {
-  diffChangedEditableFields,
-  extractEditableProfileFields,
-  mergeEditableProfileFields, validateEditableProfileFields
-} from "./editable-profile.js";
+import { diffChangedEditableFields, extractEditableProfileFields, mergeEditableProfileFields,
+  validateEditableProfileFields} from "./editable-profile.js";
+import { ProfilesRepository } from './profiles-repository.js'
 /** @typedef {import('./models.js').CliDeps} CliDeps */
 /** @typedef {import('./models.js').CliArgs} CliArgs */
 
@@ -24,9 +21,6 @@ import {
  */
 export async function runCli(args, deps = {}) {
   const {
-    loadProfileByLabel: load = loadProfileByLabel,
-    loadAllProfiles: loadAll = loadAllProfiles,
-    saveProfiles: save = saveProfiles,
     promptForMasterPassword: prompt = promptForMasterPassword,
     generatePassword: generate = generatePassword,
     copyToClipboard: copy = copyToClipboard,
@@ -37,6 +31,7 @@ export async function runCli(args, deps = {}) {
     openInEditor: openEditor = openInEditor,
     loadConfig: loadCfg = loadConfig,
     saveConfig: saveCfg = saveConfig,
+    ProfilesRepositoryClass = ProfilesRepository,
     stdout = process.stdout,
     stderr = process.stderr
   } = deps
@@ -50,14 +45,19 @@ export async function runCli(args, deps = {}) {
     checkForConflicts(args)
 
     if (args.list) {
-      const profiles = await loadAll()
-      const config = await loadCfg()
-      stdout.write(formatProfileList(profiles, config.sortBy) + '\n')
-      return 0
-    }
+      const repo = await ProfilesRepositoryClass.load()
+
+      stdout.write(formatProfileList(repo.list()) + '\n')
+      return 0    }
 
     if (args.bump) {
-      const profile = await load(args.bump)
+      const repo = await ProfilesRepositoryClass.load()
+
+      const profile = repo.get(args.bump)
+      if (!profile) {
+        stderr.write(`Profile '${args.bump}' does not exist\n`)
+        return 1
+      }
 
       const oldCounter = profile.counter
       const newCounter = oldCounter + 1
@@ -85,12 +85,13 @@ export async function runCli(args, deps = {}) {
           updatedAt: now
         }
 
-        const all = await loadAll()
-        const updated = all.map(p =>
-          p.label === profile.label ? updatedProfile : p
-        )
-
-        await save(updated)
+        try {
+          repo.replace(updatedProfile)
+          await repo.persist()
+        } catch (err) {
+          stderr.write(`${err.message}\n`)
+          return 1
+        }
 
         stdout.write(`Counter: ${oldCounter} → ${newCounter} (saved)\n`)
       } else {
@@ -101,22 +102,34 @@ export async function runCli(args, deps = {}) {
     }
 
     if (args.create) {
-      const all = await loadAll()
+      const repo = await ProfilesRepositoryClass.load()
 
-      if (all.some(p => p.label === args.create)) {
-        stderr.write(`Profile already exists: '${args.create}'\n`)
+      if (repo.get(args.create)) {
+        stderr.write(`Profile '${args.create}' already exists\n`)
         return 1
       }
 
       const profile = createDefaultProfile(args.create)
-      await save([...all, profile])
+      try {
+        repo.create(profile)
+        await repo.persist()
+      } catch (err) {
+        stderr.write(`${err.message}\n`)
+        return 1
+      }
 
       stdout.write(`Created profile: '${args.create}'\n`)
       return 0
     }
 
     if (args.editLabel) {
-      const original = await load(args.editLabel)
+      const repo = await ProfilesRepositoryClass.load()
+
+      const original = repo.get(args.editLabel)
+      if (!original) {
+        stderr.write(`Profile not found: '${args.editLabel}'\n`)
+        return 1
+      }
 
       const editable = extractEditableProfileFields(original)
       const content = JSON.stringify(editable, null, 2)
@@ -174,10 +187,14 @@ export async function runCli(args, deps = {}) {
             updatedAt: new Date().toISOString()
         }
 
-        const all = await loadAll()
-        const updated = all.map(p => p.label === original.label ? updatedProfile : p)
+        try {
+          repo.replace(updatedProfile)
+          await repo.persist()
+        } catch (err) {
+          stderr.write(`${err.message}\n`)
+          return 1
+        }
 
-        await save(updated)
         stdout.write(`Updated profile '${args.editLabel}'\n`)
         return 0
       } finally {
@@ -186,10 +203,11 @@ export async function runCli(args, deps = {}) {
     }
 
     if (args.deleteLabel) {
-      const all = await loadAll()
-      const existing = all.find(p => p.label === args.deleteLabel)
+      const repo = await ProfilesRepositoryClass.load()
 
-      if (!existing) {
+      const profile = repo.get(args.deleteLabel)
+
+      if (!profile) {
         stderr.write(`Profile does not exist: '${args.deleteLabel}'\n`)
         return 1
       }
@@ -203,16 +221,29 @@ export async function runCli(args, deps = {}) {
         return 0
       }
 
-      const remaining = all.filter(p => p.label !== args.deleteLabel)
-      await save(remaining)
+      try {
+        repo.delete(args.deleteLabel)
+        await repo.persist()
+      } catch (err) {
+        stderr.write(`${err.message}\n`)
+        return 1
+      }
 
       stdout.write(`Deleted profile: '${args.deleteLabel}'\n`)
       return 0
     }
 
     if (args.showProfileLabel) {
-      const profile = await load(args.showProfileLabel)
-      stdout.write(serializeProfilePretty(profile) + '\n')
+      const repo = await ProfilesRepositoryClass.load()
+
+      const profile = repo.get(args.showProfileLabel)
+
+      if (!profile) {
+        stderr.write(`Profile '${args.showProfileLabel}' does not exist\n`)
+        return 1
+      }
+
+      stdout.write(`${serializeProfilePretty(profile)}\n`)
       return 0
     }
 
@@ -232,7 +263,15 @@ export async function runCli(args, deps = {}) {
       return 0
     }
 
-    const profile = await load(args.profileLabel)
+    const repo = await ProfilesRepositoryClass.load()
+
+    const profile = repo.get(args.profileLabel)
+
+    if (!profile) {
+      stderr.write(`Profile not found: '${args.profileLabel}'\n`)
+      return 1
+    }
+
     const masterPassword = await prompt()
     const password = await generate(masterPassword, profile)
 

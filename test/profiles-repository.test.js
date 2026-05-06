@@ -78,4 +78,37 @@ describe('ProfilesRepository methods', () => {
     const saved = JSON.parse(await fs.readFile(profilesPath, 'utf8'))
     expect(saved).toHaveLength(1)
   })
+
+  it('throws when replacing non-existent profile', async () => {
+    const repo = await ProfilesRepository.load({
+      loadAllProfiles: async () => []
+    })
+
+    expect(() =>
+      repo.replace(makeProfile({ label: 'ghost' }))
+    ).toThrow(/does not exist/)
+  })
+
+  it('throws when creating duplicate label', async () => {
+    const repo = await ProfilesRepository.load({
+      loadAllProfiles: async () => [
+        makeProfile({ label: 'github' })
+      ]
+    })
+
+    expect(() =>
+      repo.create(makeProfile({ label: 'github' }))
+    ).toThrow(/already exists/)
+  })
+
+
+  it('throws when deleting non-existent profile', async () => {
+    const repo = await ProfilesRepository.load({
+      loadAllProfiles: async () => []
+    })
+
+    expect(() =>
+      repo.delete('ghost')
+    ).toThrow(/does not exist/)
+  })
 })

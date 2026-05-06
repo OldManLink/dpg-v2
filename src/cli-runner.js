@@ -187,8 +187,14 @@ export async function runCli(args, deps = {}) {
             updatedAt: new Date().toISOString()
         }
 
-        repo.replace(updatedProfile)
-        await repo.persist()
+        try {
+          repo.replace(updatedProfile)
+          await repo.persist()
+        } catch (err) {
+          stderr.write(`${err.message}\n`)
+          return 1
+        }
+
         stdout.write(`Updated profile '${args.editLabel}'\n`)
         return 0
       } finally {
@@ -215,8 +221,13 @@ export async function runCli(args, deps = {}) {
         return 0
       }
 
-      repo.delete(args.deleteLabel)
-      await repo.persist()
+      try {
+        repo.delete(args.deleteLabel)
+        await repo.persist()
+      } catch (err) {
+        stderr.write(`${err.message}\n`)
+        return 1
+      }
 
       stdout.write(`Deleted profile: '${args.deleteLabel}'\n`)
       return 0

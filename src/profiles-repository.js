@@ -45,6 +45,10 @@ export class ProfilesRepository {
    * @param {Profile} profile
    */
   create(profile) {
+    if (this.get(profile.label)) {
+      throw new Error(`Profile already exists: '${profile.label}'`)
+    }
+
     this._profiles.push(profile)
   }
 
@@ -53,6 +57,11 @@ export class ProfilesRepository {
    */
   replace(profile) {
     const i = this._profiles.findIndex(p => p.label === profile.label)
+
+    if (i === -1) {
+      throw new Error(`Profile does not exist: '${profile.label}'`)
+    }
+
     this._profiles[i] = profile
   }
 
@@ -60,6 +69,12 @@ export class ProfilesRepository {
    * @param {string} label
    */
   delete(label) {
+    const i = this._profiles.findIndex(p => p.label === label)
+
+    if (i === -1) {
+      throw new Error(`Profile does not exist: '${label}'`)
+    }
+
     this._profiles = this._profiles.filter(p => p.label !== label)
   }
 

@@ -18,7 +18,7 @@ This is not a general-purpose test framework.
 
 It is a **small, purpose-built DSL** for testing CLI behavior with minimal ceremony and maximum clarity.
 
-> Prefer clarity to cleverness, and explicit behavior over implicit magic.
+> Prefer clarity over cleverness, and explicit behavior over implicit magic.
 
 ---
 
@@ -64,7 +64,7 @@ contains	\qsortBy\q: \qlabel\q
 
 This will be interpreted by the harness as:
 
-```markdown
+```
 ..."sortBy": "label"...
 ```
 
@@ -76,7 +76,7 @@ exact	line1\nline2
 
 This will be interpreted by the harness as:
 
-```markdown
+```
 line1
 line2
 ```

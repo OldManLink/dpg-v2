@@ -15,10 +15,11 @@ export async function generatePassword(masterPassword, profile,  kdfOverrides = 
     throw new Error('Master password must not be empty')
   }
 
+  const requiresSymbolSet = profile.require.includes('symbol')
   const normalizedProfile = {
     ...profile,
     require: canonicalRequire(profile.require),
-    symbolSet: canonicalSymbolSet(profile.symbolSet)
+    symbolSet: requiresSymbolSet ? canonicalSymbolSet(profile.symbolSet) : ''
   }
 
   const context = encodeContext(normalizedProfile)

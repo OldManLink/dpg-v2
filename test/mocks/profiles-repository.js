@@ -20,6 +20,9 @@ export function profilesRepositoryClassMock(initialProfiles, overrides = {}) {
   let profiles = [...initialProfiles]
 
   const repo = {
+    _profiles: [],
+    _saveProfiles: undefined,
+
     list: () => [...profiles],
 
     get: (/** @type {string} */ label) =>
@@ -41,6 +44,7 @@ export function profilesRepositoryClassMock(initialProfiles, overrides = {}) {
     persist: vi.fn(async () => {
     }),
 
+    "findDuplicateDerivedPasswordGroups": () => [],
     ...overrides
   }
 

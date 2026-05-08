@@ -39,7 +39,6 @@ describe('mergeEditableProfileFields', () => {
       account: 'peter@corp.example',
       counter: 9,
       length: 24,
-      //* @type RequireClass[] */
       require: ['lower', 'upper', 'digit'],
       symbolSet: '@!#'
     })
@@ -55,7 +54,7 @@ describe('mergeEditableProfileFields', () => {
     expect(merged.counter).toBe(9)
     expect(merged.length).toBe(24)
     expect(merged.require).toEqual(['lower', 'upper', 'digit'])
-    expect(merged.symbolSet).toEqual('@!#')
+    expect(merged.symbolSet).toBeUndefined()
   })
 })
 

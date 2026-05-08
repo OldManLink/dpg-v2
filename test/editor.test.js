@@ -59,6 +59,55 @@ describe('edit command', () => {
     expect(output).toMatch(/Updated profile 'github-main'/)
   })
 
+  it('updates a profile after removing "symbol" and symbolSet', async () => {
+    const original = makeProfile({
+      label: 'github-main',
+      service: 'github.com',
+      account: 'peter@example.com',
+      counter: 4,
+      length: 20,
+      require: ['lower', 'upper', 'digit', 'symbol'],
+      symbolSet: '@!#'
+    })
+
+    const stdout = { write: vi.fn() }
+    const repoMock = profilesRepositoryClassMock([original])
+
+    const exitCode = await runCli(
+      makeCliArgs({ editLabel: 'github-main' }),
+      {
+        ProfilesRepositoryClass: repoMock,
+        writeTempFile: async () => '/tmp/github-main_1776883800.json',
+        openInEditor: async () => 0,
+        readTempFile: async () => JSON.stringify({
+          service: 'github-enterprise.example.com',
+          account: 'peter@example.com',
+          counter: 4,
+          length: 20,
+          require: ['lower', 'upper', 'digit']
+        }, null, 2),
+        deleteTempFile: async () => {},
+        promptForConfirmation: async () => 'y',
+        stdout,
+        stderr: { write: vi.fn() }
+      }
+    )
+
+    expect(exitCode).toBe(0)
+    expect(repoMock.repo.replace).toHaveBeenCalled()
+    const updated = repoMock.repo.replace.mock.calls[0][0]
+
+    expect(updated.createdAt).toBe(original.createdAt)
+    expect(updated.updatedAt).not.toBe(original.updatedAt)
+    expect(updated.service).toBe('github-enterprise.example.com')
+    expect(repoMock.repo.persist).toHaveBeenCalled()
+
+    const output = stdout.write.mock.calls.map(c => c[0]).join('')
+    expect(output).toMatch(/changed fields: service/i)
+    expect(output).toMatch(/will affect the generated password/i)
+    expect(output).toMatch(/Updated profile 'github-main'/)
+  })
+
   it('prints no changes made when edited content is unchanged', async () => {
     const original = makeProfile({label: 'github-main'})
     const repoMock = profilesRepositoryClassMock([original])

@@ -18,6 +18,7 @@
     "service": "duplicate.example",
     "account": "",
     "counter": 1,
+    "length":20,
     "require":["lower","digit"]
   },
   {
@@ -26,6 +27,7 @@
     "service": "duplicate.example",
     "account": "",
     "counter": 1,
+    "length":20,
     "require":["lower","digit"]
   }
 ]

@@ -1,5 +1,6 @@
 import {canonicalSymbolSet, REQUIRE_CLASS_ORDER, validateProfileLabel} from './profile-validation.js'
 /** @typedef {import('./models.js').RequireClass} RequireClass */
+/** @typedef {import('./models.js').Profile} Profile */
 
 /** @type RequireClass[] */
 export const DEFAULT_REQUIRE = [...REQUIRE_CLASS_ORDER]
@@ -8,6 +9,7 @@ export const DEFAULT_SYMBOL_SET = canonicalSymbolSet('@!#')
 /**
  * @param {string} label
  * @param {string=} now
+ * @returns {Profile}
  */
 export function createDefaultProfile(label, now = new Date().toISOString()) {
   validateProfileLabel(label)

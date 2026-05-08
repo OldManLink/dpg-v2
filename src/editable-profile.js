@@ -24,11 +24,12 @@ export function extractEditableProfileFields(profile){
  * @returns {Profile}
  */
 export function mergeEditableProfileFields(original, edited){
+  const requiresSymbolSet = edited.require && edited.require.includes('symbol')
   return {
     ...original,
     ...edited,
     require: canonicalRequire(edited.require),
-    symbolSet: canonicalSymbolSet(edited.symbolSet)
+    symbolSet: requiresSymbolSet ? canonicalSymbolSet(edited.symbolSet) : undefined
   }
 }
 
@@ -104,7 +105,7 @@ export function validateEditableProfileFields(edited) {
     canonicalRequire(edited.require)
   }
 
-  if (edited.symbolSet !== undefined) {
+  if (edited.require && edited.require.includes('symbol')) {
     canonicalSymbolSet(edited.symbolSet)
   }
 }

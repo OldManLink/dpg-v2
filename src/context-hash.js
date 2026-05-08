@@ -21,17 +21,7 @@ export function withCtxHash(profile){
   }}
 
 /**
- * Return copies of all profiles with ctxHash refreshed.
- *
- * @param {Profile[]} profiles
- * @returns {Profile[]}
- */
-export function withCtxHashes(profiles) {
-  return profiles.map(withCtxHash)
-}
-
-/**
- * Return copies of all profiles with ctxHash refreshed.
+ * Return copies of all profiles with ctxHash refreshed if missing.
  *
  * Intended for use when loading profiles, to ensure ctxHash is present
  * and up to date before further processing.
@@ -42,5 +32,7 @@ export function withCtxHashes(profiles) {
  * @returns {Profile[]}
  */
 export function backfillCtxHashes(profiles) {
-  return withCtxHashes(profiles)
+  return profiles.map(profile =>
+    profile.ctxHash ? profile : withCtxHash(profile)
+  )
 }

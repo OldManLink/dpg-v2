@@ -22,7 +22,8 @@
  *   symbolSet?: string,
  *   notes?: string,
  *   createdAt?: string,
- *   updatedAt?: string
+ *   updatedAt?: string,
+ *   ctxHash?: string
  * }} Profile
  */
 
@@ -118,12 +119,15 @@
  *     loadAllProfiles?: () => Promise<Profile[]>,
  *     saveProfiles?: (profiles: Profile[]) => Promise<void>
  *   }) => Promise<{
+ *     _profiles: Profile[],
+ *     _saveProfiles: (profiles: Profile[]) => Promise<void>,
  *     list: () => Profile[],
  *     get: (label: string) => Profile | null,
  *     delete: (label: string) => void,
- *     create: (profile: Profile) => void
- *     replace: (profile: Profile) => void
- *     persist: () => Promise<void>
+ *     create: (profile: Profile) => void,
+ *     replace: (profile: Profile) => void,
+ *     persist: () => Promise<void>,
+ *     findDuplicateDerivedPasswordGroups: () => string[][]
  *   }>
  * }} ProfilesRepositoryFactory
  */

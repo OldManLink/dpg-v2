@@ -16,7 +16,8 @@ describe('serializeProfilePretty', () => {
   it('serializes all present fields in stable order', () => {
     const profile = makeProfile({
       account: 'peter@example.com',
-      notes: 'Main account'
+      notes: 'Main account',
+      ctxHash: 'AmazingHash'
     })
 
     const text = serializeProfilePretty(profile)
@@ -35,7 +36,8 @@ describe('serializeProfilePretty', () => {
       'symbolSet',
       'notes',
       'createdAt',
-      'updatedAt'
+      'updatedAt',
+      'ctxHash'
     ])
   })
 
@@ -43,12 +45,14 @@ describe('serializeProfilePretty', () => {
     const profile = makeProfile()
     delete profile.account
     delete profile.notes
+    delete profile.ctxHash
 
     const text = serializeProfilePretty(profile)
     const parsed = JSON.parse(text)
 
     expect(parsed.account).toBeUndefined()
     expect(parsed.notes).toBeUndefined()
+    expect(parsed.ctxHash).toBeUndefined()
 
     expect(Object.keys(parsed)).toEqual([
       'version',

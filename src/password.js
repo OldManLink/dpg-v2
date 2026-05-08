@@ -58,7 +58,8 @@ function pickChar(stream, alphabet) {
 export function generatePasswordFromSiteKey(siteKey, profile) {
   const require = canonicalRequire(profile.require ?? [])
   const length = profile.length
-  const symbolSet = canonicalSymbolSet(profile.symbolSet ?? CANONICAL_SYMBOLS)
+  const requiresSymbolSet = require.includes('symbol')
+  const symbolSet = requiresSymbolSet ? canonicalSymbolSet(profile.symbolSet ?? CANONICAL_SYMBOLS) : ''
 
   if (!Number.isInteger(length) || length < 1) {
     throw new Error('length must be a positive integer')

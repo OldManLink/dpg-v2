@@ -17,6 +17,8 @@ export function encodeContext(profile) {
     return `${bytes.length}:${str}\0`
   }
 
+  const requiresSymbolSet = profile.require.includes('symbol')
+
   const parts = [
     'DPGCTX\0',
     field(profile.version),
@@ -25,7 +27,7 @@ export function encodeContext(profile) {
     field(String(profile.counter)),
     field(String(profile.length)),
     field(String(canonicalRequire(profile.require))),
-    field(String(canonicalSymbolSet(profile.symbolSet || '')))
+    field(String(requiresSymbolSet ? canonicalSymbolSet(profile.symbolSet) : ''))
   ]
 
   return encoder.encode(parts.join(''))

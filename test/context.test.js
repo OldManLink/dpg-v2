@@ -98,5 +98,28 @@ describe('encodeContext', () => {
     expect(Array.from(encodeContext(p1)))
       .not.toEqual(Array.from(encodeContext(p2)))
   })
+
+  it('does not require symbolSet when require does not include symbol', () => {
+    const a = makeProfile({
+      require: ['lower', 'digit'],
+      symbolSet: undefined
+    })
+
+    expect(() => encodeContext(a)).not.toThrow()
+  })
+
+  it('encodes profiles without symbol requirement identically regardless of symbolSet', () => {
+    const a = makeProfile({
+      require: ['lower', 'digit'],
+      symbolSet: undefined
+    })
+
+    const b = makeProfile({
+      require: ['digit', 'lower'],
+      symbolSet: '@!#'
+    })
+
+    expect(encodeContext(a)).toStrictEqual(encodeContext(b))
+  })
 })
 

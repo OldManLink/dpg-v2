@@ -1,4 +1,4 @@
-import {describe, it, expect, vi} from 'vitest'
+import {describe, expect, it, vi} from 'vitest'
 import {openInEditor, splitCommand} from '../src/editor.js'
 import {runCli} from "../src/cli-runner.js";
 import {makeCliArgs} from "./fixtures/cli.js";
@@ -7,6 +7,7 @@ import {profilesRepositoryClassMock} from "./mocks/profiles-repository.js";
 import {makeConfig} from "./fixtures/config.js";
 /** @typedef {import('../src/models.js').EditorSpawn} EditorSpawn */
 /** @typedef {import('node:child_process').ChildProcess} ChildProcess */
+/** @typedef {import('../src/models.js').ProfilesRepositoryFactory} ProfilesRepositoryFactory */
 
 describe('edit command', () => {
   it('updates a profile after valid edit and confirmation', async () => {
@@ -57,6 +58,50 @@ describe('edit command', () => {
     expect(output).toMatch(/changed fields: service/i)
     expect(output).toMatch(/will affect the generated password/i)
     expect(output).toMatch(/Updated profile 'github-main'/)
+  })
+
+  it('updates a profile after removing "symbol" and symbolSet', async () => {
+    const original = makeProfile({
+      label: 'github-main',
+      service: 'github.com',
+      account: 'peter@example.com',
+      counter: 4,
+      length: 20,
+      require: ['lower', 'upper', 'digit', 'symbol'],
+      symbolSet: '@!#'
+    })
+
+    const stdout = { write: vi.fn() }
+    const repoMock = profilesRepositoryClassMock([original])
+
+    const exitCode = await runCli(
+      makeCliArgs({ editLabel: 'github-main' }),
+      {
+        ProfilesRepositoryClass: repoMock,
+        writeTempFile: async () => '/tmp/github-main_1776883800.json',
+        openInEditor: async () => 0,
+        readTempFile: async () => JSON.stringify({
+          service: 'github.com',
+          account: 'peter@example.com',
+          counter: 4,
+          length: 20,
+          require: ['upper', 'lower', 'digit']
+        }, null, 2),
+        deleteTempFile: async () => {},
+        promptForConfirmation: async () => 'y',
+        stdout,
+        stderr: { write: vi.fn() }
+      }
+    )
+
+    expect(exitCode).toBe(0)
+    expect(repoMock.repo.replace).toHaveBeenCalled()
+    const updated = repoMock.repo.replace.mock.calls[0][0]
+    expect(updated.require).toStrictEqual(['lower', 'upper', 'digit'])
+    expect(updated.symbolSet).not.toBeDefined()
+
+    const output = stdout.write.mock.calls.map(c => c[0]).join('')
+    expect(output).toMatch(/changed fields: require, symbolSet/i)
   })
 
   it('prints no changes made when edited content is unchanged', async () => {
@@ -268,32 +313,9 @@ describe('edit command', () => {
     const original = makeProfile({ label: 'github-main' })
     const repoMock = profilesRepositoryClassMock([original])
 
-    let usedEditor = null
-
     const prev = process.env.EDITOR
     process.env.EDITOR = 'nano'
-
-    try {
-      await runCli(
-        makeCliArgs({ editLabel: 'github-main' }),
-        {
-          ProfilesRepositoryClass: repoMock,
-          loadConfig: async () => ({}),
-
-          writeTempFile: async () => '/tmp/file.json',
-          openInEditor: async (editor) => {
-            usedEditor = editor
-            return 1
-          },
-          deleteTempFile: async () => {},
-
-          stdout: { write: vi.fn() },
-          stderr: { write: vi.fn() }
-        }
-      )
-    } finally {
-      process.env.EDITOR = prev
-    }
+    const usedEditor = await runEditor(repoMock, prev)
 
     expect(usedEditor).toBe('nano')
   })
@@ -302,32 +324,9 @@ describe('edit command', () => {
     const original = makeProfile({ label: 'github-main' })
     const repoMock = profilesRepositoryClassMock([original])
 
-    let usedEditor = null
-
     const prev = process.env.EDITOR
     delete process.env.EDITOR
-
-    try {
-      await runCli(
-        makeCliArgs({ editLabel: 'github-main' }),
-        {
-          ProfilesRepositoryClass: repoMock,
-          loadConfig: async () => ({}),
-
-          writeTempFile: async () => '/tmp/file.json',
-          openInEditor: async (editor) => {
-            usedEditor = editor
-            return 1
-          },
-          deleteTempFile: async () => {},
-
-          stdout: { write: vi.fn() },
-          stderr: { write: vi.fn() }
-        }
-      )
-    } finally {
-      process.env.EDITOR = prev
-    }
+    const usedEditor = await runEditor(repoMock, prev)
 
     expect(usedEditor).toBe('vi')
   })
@@ -449,71 +448,22 @@ describe('edit command', () => {
   })
 
   it('splits editor command and appends file path', async () => {
-    let spawnedCommand = null
-    let spawnedArgs = null
+    let spawnedCommand = []
+    let spawnedArgs = []
 
-    const fakeSpawn =
-      /** @type {EditorSpawn} */ (
-      /** @type {unknown} */ (
-        /**
-         * @param {string} command
-         * @param {readonly string[]} args
-         * @param {object=} _options
-         * @returns {ChildProcess}
-         */
-          (command, args, _options) => {
-          spawnedCommand = command
-          spawnedArgs = [...args]
+    await openInEditor('code --wait', '/tmp/file.json', fakeSpawn(spawnedCommand, spawnedArgs))
 
-          return /** @type {ChildProcess} */ ({
-            on: (
-              /** @type {'error' | 'close'} */ event,
-              /** @type {(value: any) => void} */ handler
-            ) => {
-              if (event === 'close') handler(0)
-            }
-          })
-        }
-      )
-    )
-
-    await openInEditor('code --wait', '/tmp/file.json', fakeSpawn)
-
-    expect(spawnedCommand).toBe('code')
+    expect(spawnedCommand[0]).toBe('code')
     expect(spawnedArgs).toEqual(['--wait', '/tmp/file.json'])
   })
 
   it('supports quoted editor paths', async () => {
-    let spawnedCommand = null
-    let spawnedArgs = null
+    let spawnedCommand = []
+    let spawnedArgs = []
 
-    const fakeSpawn =
-      /** @type {EditorSpawn} */ (
-      /** @type {unknown} */ (
-        /**
-         * @param {string} command
-         * @param {readonly string[]} args
-         * @param {object=} _options
-         * @returns {ChildProcess}
-         */
-          (command, args, _options) => {
-          spawnedCommand = command
-          spawnedArgs = [...args]
+    await openInEditor('"C:\\Program Files\\Editor\\editor.exe" --wait', 'C:\\tmp\\file.json', fakeSpawn(spawnedCommand, spawnedArgs))
 
-          return /** @type {ChildProcess} */ ({
-            on: (
-              /** @type {'error' | 'close'} */ event,
-              /** @type {(value: any) => void} */ handler
-            ) => {
-              if (event === 'close') handler(0)
-            }
-          })
-        }
-      )
-    )
-
-    await openInEditor('"C:\\Program Files\\Editor\\editor.exe" --wait', 'C:\\tmp\\file.json', fakeSpawn)
-    expect(spawnedCommand).toBe('C:\\Program Files\\Editor\\editor.exe')
+    expect(spawnedCommand[0]).toBe('C:\\Program Files\\Editor\\editor.exe')
     expect(spawnedArgs).toEqual(['--wait', 'C:\\tmp\\file.json'])
   })
 })
@@ -530,3 +480,69 @@ describe('splitCommand', () => {
     ])
   })
 })
+
+/**
+ * @param {ProfilesRepositoryFactory} repoMock
+ * @param {string} prev
+ * @returns {Promise<string>}
+ */
+async function runEditor(repoMock, prev) {
+  let usedEditor = null
+  try {
+    await runCli(
+      makeCliArgs({editLabel: 'github-main'}),
+      {
+        ProfilesRepositoryClass: repoMock,
+        loadConfig: async () => ({}),
+
+        writeTempFile: async () => '/tmp/file.json',
+        openInEditor: async (editor) => {
+          usedEditor = editor
+          return 1
+        },
+        deleteTempFile: async () => {
+        },
+
+        stdout: {write: vi.fn()},
+        stderr: {write: vi.fn()}
+      }
+    )
+  } finally {
+    process.env.EDITOR = prev
+  }
+  return usedEditor
+}
+
+/**
+ * @param {string[] } spawnedCommand
+ * @param {string[]} spawnedArgs
+ * @returns {EditorSpawn}
+ */
+function fakeSpawn(spawnedCommand, spawnedArgs) {
+  let fakedSpawn
+  fakedSpawn =
+    /** @type {EditorSpawn} */ (
+    /** @type {unknown} */ (
+      /**
+       * @param {string} command
+       * @param {readonly string[]} args
+       * @param {object=} _options
+       * @returns {ChildProcess}
+       */
+        (command, args, _options) => {
+        spawnedCommand.push(command)
+        spawnedArgs.push(...args)
+
+        return /** @type {ChildProcess} */ ({
+          on: (
+            /** @type {'error' | 'close'} */ event,
+            /** @type {(value: any) => void} */ handler
+          ) => {
+            if (event === 'close') handler(0)
+          }
+        })
+      }
+    )
+  )
+  return fakedSpawn
+}

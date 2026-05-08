@@ -147,7 +147,7 @@ npm run test:slow
 
 ---
 
-## CLI
+## 💻 CLI
 
 DPG v2 includes a CLI for generating passwords from existing profiles.
 
@@ -337,6 +337,61 @@ DPG v2 uses native platform tools:
 - Windows: `clip`
 - Linux: `wl-copy`, `xclip`, or `xsel`
 - (planned) Best-effort clipboard cleaning where supported
+ 
+---
+
+## 🚨 Duplicate Password Detection
+
+DPG detects when two or more profiles would derive the same password and emits a warning during normal CLI usage.
+
+Example:
+
+```text
+Warning: profiles derive the same password: github-home, github-work
+```
+
+Warnings are shown on commands such as:
+
+- `--list`
+- `--show-profile`
+- `--profile`
+- `--bump`
+- `--edit`
+
+This feature helps prevent accidental password reuse caused by duplicate profile contexts.
+
+### How detection works
+
+Each profile stores a `ctxHash` value derived from its canonical context.
+
+The canonical context includes fields that affect password derivation, such as:
+
+- service
+- account
+- counter
+- length
+- required character classes
+- symbol set (when symbols are required)
+
+Profiles with identical canonical contexts will produce identical passwords and therefore identical `ctxHash` values.
+
+Duplicate detection works by grouping profiles with matching `ctxHash` values.
+
+### Performance
+
+`ctxHash` values are persisted in `profiles.json` so DPG does not need to recompute hashes for every profile on every command invocation.
+
+Missing hashes are automatically backfilled when profiles are loaded.
+
+### Important note about manual editing
+
+Manual editing of `profiles.json` is strongly discouraged.
+
+If profile fields are modified outside DPG without updating the corresponding `ctxHash`, duplicate detection may produce false negatives (i.e. duplicates may not be detected).
+
+DPG automatically keeps `ctxHash` values up to date when profiles are created or modified through the CLI.
+
+---
 
 ## 🌐 Usage (planned)
 

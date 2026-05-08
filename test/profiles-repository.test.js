@@ -9,7 +9,7 @@ import { loadAllProfiles, saveProfiles } from '../src/profiles-file.js'
 
 const _loadAllProfiles = async () => [makeProfile({label: 'github-main'})]
 
-describe('ProfilesRepository methods', () => {
+describe('ProfilesRepository CRUD methods', () => {
   it('loads profiles and lists them', async () => {
     const repo = await ProfilesRepository.load({loadAllProfiles: _loadAllProfiles})
 
@@ -68,17 +68,95 @@ describe('ProfilesRepository methods', () => {
     const profilesPath = path.join(dir, 'profiles.json')
 
     const repo = await ProfilesRepository.load({
-      loadAllProfiles: () => loadAllProfiles({ profilesPath }),
-      saveProfiles: profiles => saveProfiles(profiles, { profilesPath })
+      loadAllProfiles: () => loadAllProfiles({profilesPath}),
+      saveProfiles: profiles => saveProfiles(profiles, {profilesPath})
     })
 
-    repo.create(makeProfile({ label: 'github-main' }))
+    repo.create(makeProfile({label: 'github-main'}))
     await repo.persist()
 
     const saved = JSON.parse(await fs.readFile(profilesPath, 'utf8'))
     expect(saved).toHaveLength(1)
   })
+})
 
+describe('ProfilesRepository duplicate detection', () => {
+  it('detects two profiles with identical canonical contexts', async () => {
+    const repo = await ProfilesRepository.load({
+      loadAllProfiles: async () => [
+        makeProfile({label: 'github-home', service: 'github.com', counter: 1}),
+        makeProfile({label: 'github-work', service: 'github.com', counter: 1})
+      ]
+    })
+
+    let groups = repo.findDuplicateDerivedPasswordGroups();
+    expect(groups).toHaveLength(1)
+    expect(groups[0]).toEqual(['github-home', 'github-work'])
+  })
+
+  it('detects two out of three profiles with almost identical canonical contexts', async () => {
+    const repo = await ProfilesRepository.load({
+      loadAllProfiles: async () => [
+        makeProfile({label: 'a', service: 'x', counter: 1}),
+        makeProfile({label: 'b', service: 'x', counter: 1}),
+        makeProfile({label: 'c', service: 'y', counter: 1})
+      ]
+    })
+
+    let groups = repo.findDuplicateDerivedPasswordGroups();
+    expect(groups).toHaveLength(1)
+    expect(groups[0]).toEqual(['a', 'b'])
+  })
+
+  it('does not report profiles with different canonical contexts', async () => {
+    const repo = await ProfilesRepository.load({
+      loadAllProfiles: async () => [
+        makeProfile({label: 'a', service: 'a.example', counter: 1}),
+        makeProfile({label: 'b', service: 'b.example', counter: 1})
+      ]
+    })
+
+    let groups = repo.findDuplicateDerivedPasswordGroups();
+    expect(groups).toHaveLength(0)
+  })
+
+  it('confirms duplicates by comparing canonical contexts within ctxHash buckets', async () => {
+    const repo = await ProfilesRepository.load({
+      loadAllProfiles: async () => [
+        makeProfile({label: 'a', service: 'a.example', ctxHash: 'forced-collision'}),
+        makeProfile({label: 'b', service: 'b.example', ctxHash: 'forced-collision'})
+      ]
+    })
+
+    expect(repo.findDuplicateDerivedPasswordGroups()).toEqual([])
+  })
+
+  it('uses labels in deterministic order', async () => {
+    const repo = await ProfilesRepository.load({
+      loadAllProfiles: async () => [
+        makeProfile({label: 'zeta', service: 'same'}),
+        makeProfile({label: 'alpha', service: 'same'})
+      ]
+    })
+    expect(repo.findDuplicateDerivedPasswordGroups()).toEqual([
+      ['alpha', 'zeta']
+    ])
+  })
+
+  it('backfills ctxHash on load', async () => {
+    const repo = await ProfilesRepository.load({
+      loadAllProfiles: async () => [
+        makeProfile({ label: 'a' }) // no ctxHash
+      ]
+    })
+
+    const p = repo.list()[0]
+
+    expect(p.ctxHash).toBeDefined()
+  })
+})
+
+describe('ProfilesRepository exceptions', () => {
   it('throws when replacing non-existent profile', async () => {
     const repo = await ProfilesRepository.load({
       loadAllProfiles: async () => []

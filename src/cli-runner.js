@@ -11,6 +11,7 @@ import { readTempFile, writeTempFile, deleteTempFile, openInEditor } from "./edi
 import { diffChangedEditableFields, extractEditableProfileFields, mergeEditableProfileFields,
   validateEditableProfileFields} from "./editable-profile.js";
 import { ProfilesRepository } from './profiles-repository.js'
+import {formatDuplicateDerivedPasswordWarnings} from "./duplicate-contexts.js";
 /** @typedef {import('./models.js').CliDeps} CliDeps */
 /** @typedef {import('./models.js').CliArgs} CliArgs */
 
@@ -46,9 +47,10 @@ export async function runCli(args, deps = {}) {
 
     if (args.list) {
       const repo = await ProfilesRepositoryClass.load()
-
+      warnOnDuplicateDerivedPasswords(repo, stderr)
       stdout.write(formatProfileList(repo.list()) + '\n')
-      return 0    }
+      return 0
+    }
 
     if (args.bump) {
       const repo = await ProfilesRepositoryClass.load()
@@ -93,8 +95,10 @@ export async function runCli(args, deps = {}) {
           return 1
         }
 
+        warnOnDuplicateDerivedPasswords(repo, stderr)
         stdout.write(`Counter: ${oldCounter} → ${newCounter} (saved)\n`)
       } else {
+        warnOnDuplicateDerivedPasswords(repo, stderr)
         stdout.write(`Counter: ${oldCounter} → ${newCounter}\n`)
       }
 
@@ -118,6 +122,7 @@ export async function runCli(args, deps = {}) {
         return 1
       }
 
+      warnOnDuplicateDerivedPasswords(repo, stderr)
       stdout.write(`Created profile: '${args.create}'\n`)
       return 0
     }
@@ -166,6 +171,7 @@ export async function runCli(args, deps = {}) {
         const changedFields = diffChangedEditableFields(original, editedFields)
 
         if (changedFields.length === 0) {
+          warnOnDuplicateDerivedPasswords(repo, stderr)
           stdout.write('No changes made\n')
           return 0
         }
@@ -178,6 +184,7 @@ export async function runCli(args, deps = {}) {
         )
 
         if (answer !== 'y') {
+          warnOnDuplicateDerivedPasswords(repo, stderr)
           stdout.write('No changes saved\n')
           return 0
         }
@@ -195,6 +202,7 @@ export async function runCli(args, deps = {}) {
           return 1
         }
 
+        warnOnDuplicateDerivedPasswords(repo, stderr)
         stdout.write(`Updated profile '${args.editLabel}'\n`)
         return 0
       } finally {
@@ -217,6 +225,7 @@ export async function runCli(args, deps = {}) {
       )
 
       if (answer !== 'y') {
+        warnOnDuplicateDerivedPasswords(repo, stderr)
         stdout.write('Cancelled\n')
         return 0
       }
@@ -229,6 +238,7 @@ export async function runCli(args, deps = {}) {
         return 1
       }
 
+      warnOnDuplicateDerivedPasswords(repo, stderr)
       stdout.write(`Deleted profile: '${args.deleteLabel}'\n`)
       return 0
     }
@@ -243,6 +253,7 @@ export async function runCli(args, deps = {}) {
         return 1
       }
 
+      warnOnDuplicateDerivedPasswords(repo, stderr)
       stdout.write(`${serializeProfilePretty(profile)}\n`)
       return 0
     }
@@ -277,6 +288,7 @@ export async function runCli(args, deps = {}) {
 
     await copy(password)
 
+    warnOnDuplicateDerivedPasswords(repo, stderr)
     stdout.write(`Loaded profile: ${profile.label}\n`)
     stdout.write('Password copied to clipboard.\n')
 
@@ -290,6 +302,18 @@ export async function runCli(args, deps = {}) {
     const message = error instanceof Error ? error.message : String(error)
     stderr.write(message + '\n')
     return 1
+  }
+}
+
+/**
+ * @param {ProfilesRepository} repo
+ * @param {{ write: (s: string) => void }} stderr
+ * @returns void
+ */
+function warnOnDuplicateDerivedPasswords(repo, stderr) {
+  const groups = repo.findDuplicateDerivedPasswordGroups()
+  if (groups.length > 0) {
+    stderr.write(formatDuplicateDerivedPasswordWarnings(groups) + '\n')
   }
 }
 

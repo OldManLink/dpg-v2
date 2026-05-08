@@ -1,4 +1,7 @@
-import { loadAllProfiles, saveProfiles } from './profiles-file.js'
+import {loadAllProfiles, saveProfiles} from './profiles-file.js'
+import {backfillCtxHashes, computeCtxHash, withCtxHash} from "./context-hash.js";
+import {encodeContext} from "./context.js";
+
 /** @typedef {import('./models.js').Profile} Profile */
 
 export class ProfilesRepository {
@@ -20,8 +23,7 @@ export class ProfilesRepository {
     const save = deps.saveProfiles ?? saveProfiles
 
     const profiles = await load()
-
-    return new ProfilesRepository(profiles, {
+    return new ProfilesRepository(backfillCtxHashes(profiles), {
       saveProfiles: save
     })
   }
@@ -48,8 +50,7 @@ export class ProfilesRepository {
     if (this.get(profile.label)) {
       throw new Error(`Profile already exists: '${profile.label}'`)
     }
-
-    this._profiles.push(profile)
+    this._profiles.push(withCtxHash(profile))
   }
 
   /**
@@ -62,7 +63,7 @@ export class ProfilesRepository {
       throw new Error(`Profile does not exist: '${profile.label}'`)
     }
 
-    this._profiles[i] = profile
+    this._profiles[i] = withCtxHash(profile)
   }
 
   /**
@@ -83,5 +84,51 @@ export class ProfilesRepository {
    */
   async persist() {
     await this._saveProfiles(this._profiles)
+  }
+
+  /**
+   * @returns {string[][]}
+   */
+  findDuplicateDerivedPasswordGroups(){
+    /** @type {Map<string,Profile[]>}*/
+    const buckets = new Map()
+
+    for (const profile of this._profiles) {
+      const hash = profile.ctxHash ?? computeCtxHash(profile)
+
+      if (!buckets.has(hash)) {
+        buckets.set(hash, [])
+      }
+
+      buckets.get(hash).push(profile)
+    }
+
+    /** @type {string[][]}*/
+    const groups = []
+
+    for (const bucket of buckets.values()) {
+      if (bucket.length < 2) continue
+
+      /** @type {Map<string, string[]>}*/
+      const contextBuckets = new Map()
+
+      for (const profile of bucket) {
+        const contextKey = Buffer.from(encodeContext(profile)).toString('base64')
+
+        if (!contextBuckets.has(contextKey)) {
+          contextBuckets.set(contextKey, [])
+        }
+
+        contextBuckets.get(contextKey).push(profile.label)
+      }
+
+      for (const labels of contextBuckets.values()) {
+        if (labels.length > 1) {
+          groups.push([...labels].sort((a, b) => a.localeCompare(b)))
+        }
+      }
+    }
+
+    return groups.sort((a, b) => a[0].localeCompare(b[0]))
   }
 }

@@ -307,9 +307,10 @@ Prints the current config as pretty-printed JSON.
     dpg-cli --config sortBy=label
 
 Supported keys:
-- `timeout` — non-negative integer seconds
-- `sortBy` — currently only `label`
 - `editor` — your preferred tool for editing profiles
+- `hashAbbrev` — internal used, defaults to 7
+- `sortBy` — currently only `label`
+- `timeout` — non-negative integer seconds
 
 ### Help
 

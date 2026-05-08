@@ -40,9 +40,10 @@
 
 /**
  * @typedef {{
- *   timeout?: number,
+ *   editor?: string,
+ *   hashAbbrev?: number,
  *   sortBy?: ProfileSortField,
- *   editor?: string
+ *   timeout?: number
  * }} Config
  */
 

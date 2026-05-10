@@ -64,19 +64,12 @@ describe('applyConfigUpdate', () => {
     })
   })
 
-  it('updates hashAbbrev', () => {
-    expect(applyConfigUpdate(defaultConfig(), 'hashAbbrev', '8')).toEqual({
-      editor: '',
-      hashAbbrev: 8,
-      sortBy: 'label',
-      timeout: 0
-    })
-  })
-
-  it('rejects invalid hashAbbrev', () => {
+  it('rejects manual updates to hashAbbrev', () => {
     expect(() =>
-      applyConfigUpdate(defaultConfig(), 'hashAbbrev', 'nope')
-    ).toThrow(/hashAbbrev must be a positive integer/i)
+      applyConfigUpdate(defaultConfig(), 'hashAbbrev', '8')
+    ).toThrow(
+      /Config key 'hashAbbrev' is managed by DPG and cannot be changed manually/
+    )
   })
 
   it('updates sortBy', () => {

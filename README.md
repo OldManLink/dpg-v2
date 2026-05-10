@@ -384,6 +384,8 @@ Duplicate detection works by grouping profiles with matching `ctxHash` values.
 
 Missing hashes are automatically backfilled when profiles are loaded.
 
+`hashAbbrev` is managed automatically by DPG and should not be edited manually.
+
 ### Important note about manual editing
 
 Manual editing of `profiles.json` is strongly discouraged.

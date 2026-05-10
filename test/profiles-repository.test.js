@@ -6,6 +6,7 @@ import path from "node:path";
 import { tmpdir } from "node:os";
 import { loadAllProfiles, saveProfiles } from '../src/profiles-file.js'
 /** @typedef {import('../src/models.js').Profile} Profile */
+/** @typedef {import('../src/models.js').Config} Config */
 
 const _loadAllProfiles = async () => [makeProfile({label: 'github-main'})]
 
@@ -188,5 +189,30 @@ describe('ProfilesRepository exceptions', () => {
     expect(() =>
       repo.delete('ghost')
     ).toThrow(/does not exist/)
+  })
+
+  it('expands hashAbbrev and rewrites profile hashes on abbreviated collision', async () => {
+    /** @type {Config | null} */
+    let savedConfig = null
+
+    /** @type {Profile[] | null} */
+    let savedProfiles = null
+
+    const repo = new ProfilesRepository(
+      [
+        makeProfile({ label: 'a', ctxHash: 'abc' }),
+        makeProfile({ label: 'b', ctxHash: 'abc' })
+      ],
+      {
+        config: { timeout: 90, sortBy: 'label', editor: '', hashAbbrev: 3 },
+        findRequiredHashAbbrev: () => 4,
+        saveConfig: async config => { savedConfig = config },
+        saveProfiles: async profiles => { savedProfiles = profiles }
+      }
+    )
+    await repo.persist()
+
+    expect(savedConfig.hashAbbrev).toBeGreaterThan(3)
+    expect(savedProfiles.every(p => p.ctxHash.length === savedConfig.hashAbbrev)).toBe(true)
   })
 })

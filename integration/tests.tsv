@@ -21,8 +21,8 @@ bump-with-save	dpg-cli -b github-main --save	password123	0	contains	(saved)	exac
 
 config-sortby	dpg-cli --config sortBy=label	-	0	contains	Updated config: sortBy=label	exact	-
 config-show-sortby	dpg-cli --config	-	0	contains	\qsortBy\q: \qlabel\q	exact	-
-config-hash-abbrev	dpg-cli --config hashAbbrev=8	-	0	contains	Updated config: hashAbbrev=8	exact	-
-config-show-hash-abbrev	dpg-cli --config	-	0	contains	\qhashAbbrev\q: 8	exact	-
+config-hash-abbrev	dpg-cli --config hashAbbrev=8	-	1	exact	-	contains	cannot be changed manually
+config-show-hash-abbrev	dpg-cli --config	-	0	contains	\qhashAbbrev\q: 7	exact	-
 config-timeout	dpg-cli --config timeout=900	-	0	contains	Updated config: timeout=900	exact	-
 config-show-timeout	dpg-cli --config	-	0	contains	\qtimeout\q: 900	exact	-
 config-bad-timeout	dpg-cli --config timeout=abc	-	1	exact	-	contains	Invalid timeout

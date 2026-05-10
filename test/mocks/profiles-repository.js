@@ -22,6 +22,9 @@ export function profilesRepositoryClassMock(initialProfiles, overrides = {}) {
   const repo = {
     _profiles: [],
     _saveProfiles: undefined,
+    _config: undefined,
+    _saveConfig: undefined,
+    _findRequiredHashAbbrev: undefined,
 
     list: () => [...profiles],
 

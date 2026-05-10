@@ -118,10 +118,14 @@
  * @typedef {{
  *   load: (deps?: {
  *     loadAllProfiles?: () => Promise<Profile[]>,
- *     saveProfiles?: (profiles: Profile[]) => Promise<void>
+ *     saveProfiles?: (profiles: Profile[]) => Promise<void>,
+ *     saveConfig?: (config: Config) => Promise<void>
  *   }) => Promise<{
+ *     _config: Config
+ *     _saveConfig: (config: Config) => Promise<void>,
  *     _profiles: Profile[],
  *     _saveProfiles: (profiles: Profile[]) => Promise<void>,
+ *     _findRequiredHashAbbrev: () => number,
  *     list: () => Profile[],
  *     get: (label: string) => Profile | null,
  *     delete: (label: string) => void,

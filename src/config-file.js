@@ -64,17 +64,9 @@ export function applyConfigUpdate(config, key, value) {
   }
 
   if (key === 'hashAbbrev') {
-    const parsed = Number(value)
-
-    if (!Number.isInteger(parsed) || parsed < 1) {
-      throw new Error('hashAbbrev must be a positive integer')
-    }
-
-    return {
-      ...config,
-      hashAbbrev: parsed
-    }
+    throw new Error("Config key 'hashAbbrev' is managed by DPG and cannot be changed manually")
   }
+
   if (key === 'sortBy') {
     if (value !== 'label') {
       throw new Error(`Unsupported sortBy value: '${value}'`)

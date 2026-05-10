@@ -24,9 +24,10 @@ describe('list command', () => {
     const parsed = JSON.parse(output)
 
     expect(parsed).toEqual({
-      timeout: 900,
+      editor: '',
+      hashAbbrev: 7,
       sortBy: 'label',
-      editor: ''
+      timeout: 900
     })
   })
 
@@ -47,9 +48,10 @@ describe('list command', () => {
 
     expect(exitCode).toBe(0)
     expect(savedConfig).toEqual({
-      timeout: 900,
+      editor: '',
+      hashAbbrev: 7,
       sortBy: 'label',
-      editor: ''
+      timeout: 900
     })
     expect(stdout.write).toHaveBeenCalledWith('Updated config: timeout=900\n')
   })
@@ -71,9 +73,10 @@ describe('list command', () => {
 
     expect(exitCode).toBe(0)
     expect(savedConfig).toEqual({
-      timeout: 0,
+      editor: '',
+      hashAbbrev: 7,
       sortBy: 'label',
-      editor: ''
+      timeout: 0
     })
     expect(stdout.write).toHaveBeenCalledWith('Updated config: sortBy=label\n')
   })
@@ -128,9 +131,10 @@ describe('list command', () => {
 
     expect(exitCode).toBe(0)
     expect(savedConfig).toEqual({
-      timeout: 0,
+      editor: 'nano',
+      hashAbbrev: 7,
       sortBy: 'label',
-      editor: 'nano'
+      timeout: 0
     })
     expect(stdout.write).toHaveBeenCalledWith('Updated config: editor=nano\n')
   })

@@ -1,30 +1,37 @@
 import {loadAllProfiles, saveProfiles} from './profiles-file.js'
-import {backfillCtxHashes, computeCtxHash, withCtxHash} from "./context-hash.js";
+import {backfillCtxHashes, computeFullCtxHash, findRequiredHashAbbrev, withCtxHash} from "./context-hash.js";
 import {encodeContext} from "./context.js";
-
+import {loadConfig, saveConfig} from "./config-file.js";
+/** @typedef {import('./models.js').Config} Config */
 /** @typedef {import('./models.js').Profile} Profile */
 
 export class ProfilesRepository {
   /**
    * @param {Profile[]} profiles
-   * @param {{ saveProfiles?: (profiles: Profile[]) => Promise<void> }} [deps]
+   * @param {{ saveProfiles?: (profiles: Profile[]) => Promise<void>, config?: Config, saveConfig?: (config: Config) => Promise<void> , findRequiredHashAbbrev?: () => number }} [deps]
    */
   constructor(profiles, deps = {}) {
     this._profiles = [...profiles]
     this._saveProfiles = deps.saveProfiles ?? saveProfiles
-  }
+    this._config = deps.config
+    this._saveConfig = deps.saveConfig ?? saveConfig
+    this._findRequiredHashAbbrev = deps.findRequiredHashAbbrev ?? findRequiredHashAbbrev  }
 
   /**
-   * @param {{ loadAllProfiles?: () => Promise<Profile[]>, saveProfiles?: (profiles: Profile[]) => Promise<void> }} [deps]
+   * @param {{ loadAllProfiles?: () => Promise<Profile[]>, loadConfig?: () => Promise<Config>, saveProfiles?: (profiles: Profile[]) => Promise<void>, saveConfig?: (config: Config) => Promise<void> }} [deps]
    * @returns {Promise<ProfilesRepository>}
    */
   static async load(deps = {}) {
     const load = deps.loadAllProfiles ?? loadAllProfiles
+    const loadCfg = deps.loadConfig ?? loadConfig
     const save = deps.saveProfiles ?? saveProfiles
+    const saveCfg = deps.saveConfig ?? saveConfig
 
-    const profiles = await load()
-    return new ProfilesRepository(backfillCtxHashes(profiles), {
-      saveProfiles: save
+    const config = await loadCfg()
+    return new ProfilesRepository(backfillCtxHashes(await load(), config.hashAbbrev), {
+      saveProfiles: save,
+      config: config,
+      saveConfig: saveCfg
     })
   }
 
@@ -50,7 +57,7 @@ export class ProfilesRepository {
     if (this.get(profile.label)) {
       throw new Error(`Profile already exists: '${profile.label}'`)
     }
-    this._profiles.push(withCtxHash(profile))
+    this._profiles.push(withCtxHash(profile, this._config.hashAbbrev))
   }
 
   /**
@@ -63,7 +70,7 @@ export class ProfilesRepository {
       throw new Error(`Profile does not exist: '${profile.label}'`)
     }
 
-    this._profiles[i] = withCtxHash(profile)
+    this._profiles[i] = withCtxHash(profile, this._config.hashAbbrev)
   }
 
   /**
@@ -83,6 +90,17 @@ export class ProfilesRepository {
    * @returns {Promise<void>}
    */
   async persist() {
+    const required = this._findRequiredHashAbbrev(this._profiles, this._config.hashAbbrev)
+
+    if (required > this._config.hashAbbrev) {
+      this._config = {
+        ...this._config,
+        hashAbbrev: required
+      }
+
+      this._profiles = this._profiles.map(profile => withCtxHash(profile, required))
+      await this._saveConfig(this._config)
+    }
     await this._saveProfiles(this._profiles)
   }
 
@@ -94,7 +112,7 @@ export class ProfilesRepository {
     const buckets = new Map()
 
     for (const profile of this._profiles) {
-      const hash = profile.ctxHash ?? computeCtxHash(profile)
+      const hash = profile.ctxHash ?? computeFullCtxHash(profile)
 
       if (!buckets.has(hash)) {
         buckets.set(hash, [])

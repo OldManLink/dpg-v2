@@ -14,8 +14,10 @@ import { makeConfig } from './fixtures/config.js'
 describe('defaultConfig', () => {
   it('returns the default config', () => {
     expect(defaultConfig()).toEqual({
+      editor: '',
+      hashAbbrev: 7,
+      sortBy: 'label',
       timeout: 0,
-      sortBy: 'label'
     })
   })
 })
@@ -55,23 +57,36 @@ describe('parseConfigAssignment', () => {
 describe('applyConfigUpdate', () => {
   it('updates timeout', () => {
     expect(applyConfigUpdate(defaultConfig(), 'timeout', '900')).toEqual({
+      editor: '',
+      hashAbbrev: 7,
+      sortBy: 'label',
       timeout: 900,
-      sortBy: 'label'
     })
+  })
+
+  it('rejects manual updates to hashAbbrev', () => {
+    expect(() =>
+      applyConfigUpdate(defaultConfig(), 'hashAbbrev', '8')
+    ).toThrow(
+      /Config key 'hashAbbrev' is managed by DPG and cannot be changed manually/
+    )
   })
 
   it('updates sortBy', () => {
     expect(applyConfigUpdate(defaultConfig(), 'sortBy', 'label')).toEqual({
-      timeout: 0,
-      sortBy: 'label'
+      editor: '',
+      hashAbbrev: 7,
+      sortBy: 'label',
+      timeout: 0
     })
   })
 
   it('updates editor', () => {
     expect(applyConfigUpdate(defaultConfig(), 'editor', 'nano')).toEqual({
-      timeout: 0,
+      editor: 'nano',
+      hashAbbrev: 7,
       sortBy: 'label',
-      editor: 'nano'
+      timeout: 0
     })
   })
 
@@ -105,9 +120,10 @@ describe('saveConfig', () => {
 
     const text = await fs.readFile(configPath, 'utf8')
     expect(JSON.parse(text)).toEqual({
-      timeout: 900,
+      editor: '',
+      hashAbbrev: 7,
       sortBy: 'label',
-      editor: ''
+      timeout: 900
     })
   })
 })

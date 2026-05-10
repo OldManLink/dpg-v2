@@ -12,8 +12,10 @@ function resolveConfigPath(options = {}) {
  */
 export function defaultConfig() {
   return {
-    timeout: 0,
-    sortBy: 'label'
+    editor: '',
+    hashAbbrev: 7,
+    sortBy: 'label',
+    timeout: 0
   }
 }
 
@@ -50,15 +52,19 @@ export function parseConfigAssignment(text) {
  * @returns {Config}
  */
 export function applyConfigUpdate(config, key, value) {
-  if (key === 'timeout') {
-    if (!/^\d+$/.test(value)) {
-      throw new Error(`Invalid timeout: '${value}'. Timeout must be a non-negative integer.`)
+  if (key === 'editor') {
+    if (!value) {
+      throw new Error(`No editor specified`)
     }
 
     return {
       ...config,
-      timeout: Number(value)
+      editor: value
     }
+  }
+
+  if (key === 'hashAbbrev') {
+    throw new Error("Config key 'hashAbbrev' is managed by DPG and cannot be changed manually")
   }
 
   if (key === 'sortBy') {
@@ -72,16 +78,17 @@ export function applyConfigUpdate(config, key, value) {
     }
   }
 
-  if (key === 'editor') {
-    if (!value) {
-      throw new Error(`No editor specified`)
+  if (key === 'timeout') {
+    if (!/^\d+$/.test(value)) {
+      throw new Error(`Invalid timeout: '${value}'. Timeout must be a non-negative integer.`)
     }
 
     return {
       ...config,
-      editor: value
+      timeout: Number(value)
     }
   }
+
 
   throw new Error(`Unknown config key: '${key}'`)
 }
@@ -106,9 +113,10 @@ export async function loadConfig(options = {}) {
   const parsed = JSON.parse(text)
 
   return {
-    timeout: parsed.timeout ?? 0,
+    editor: parsed.editor ?? '',
+    hashAbbrev: parsed.hashAbbrev ?? 7,
     sortBy: parsed.sortBy ?? 'label',
-    editor: parsed.editor ?? ''
+    timeout: parsed.timeout ?? 0
   }
 }
 
@@ -124,9 +132,10 @@ export async function saveConfig(config, options = {}) {
 
   await fs.mkdir(dir, { recursive: true })
   await fs.writeFile(tmpPath, JSON.stringify({
-    timeout: config.timeout,
+    editor: config.editor ?? '',
+    hashAbbrev: config.hashAbbrev,
     sortBy: config.sortBy,
-    editor: config.editor ?? ''
+    timeout: config.timeout
   }, null, 2), 'utf8')
   await fs.rename(tmpPath, configPath)
 }

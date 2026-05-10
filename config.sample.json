@@ -1,5 +1,6 @@
 {
-  "timeout": 60,
+  "editor": "nano",
+  "hashAbbrev": 7,
   "sortBy": "label",
-  "editor": "nano"
+  "timeout": 60
 }

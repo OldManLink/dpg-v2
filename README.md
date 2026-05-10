@@ -307,9 +307,10 @@ Prints the current config as pretty-printed JSON.
     dpg-cli --config sortBy=label
 
 Supported keys:
-- `timeout` — non-negative integer seconds
-- `sortBy` — currently only `label`
 - `editor` — your preferred tool for editing profiles
+- `hashAbbrev` — internal used, defaults to 7
+- `sortBy` — currently only `label`
+- `timeout` — non-negative integer seconds
 
 ### Help
 
@@ -382,6 +383,8 @@ Duplicate detection works by grouping profiles with matching `ctxHash` values.
 `ctxHash` values are persisted in `profiles.json` so DPG does not need to recompute hashes for every profile on every command invocation.
 
 Missing hashes are automatically backfilled when profiles are loaded.
+
+`hashAbbrev` is managed automatically by DPG and should not be edited manually.
 
 ### Important note about manual editing
 

@@ -4,5 +4,5 @@
   "length": 20,
   "require": ["lower","upper","digit","symbol"],
   "symbolSet": "@!#!",
-  "comment": "duplicated '!' in symbolSet"
+  "notes": "duplicated '!' in symbolSet"
 }

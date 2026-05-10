@@ -2,9 +2,10 @@
 
 /** @type {Config} */
 export const DEFAULT_CONFIG = {
-  timeout: 0,
+  editor: '',
+  hashAbbrev: 7,
   sortBy: 'label',
-  editor: ''
+  timeout: 0
 }
 
 /**

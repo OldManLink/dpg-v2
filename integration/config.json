@@ -1,5 +1,6 @@
 {
-  "timeout":90,
+  "editor":"notepad.exe",
+  "hashAbbrev": 7,
   "sortBy":"label",
-  "editor":"notepad.exe"
+  "timeout":90
 }

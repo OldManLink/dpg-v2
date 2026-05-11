@@ -3,8 +3,15 @@ set -uo pipefail
 
 REAL_HOME="$HOME"
 TEST_HOME="$(mktemp -d)"
-HASH_LIMIT=4
-HARD_STOP=500
+
+DEFAULT_HASH_LIMIT=4
+
+HASH_LIMIT="${HASH_LIMIT:-$DEFAULT_HASH_LIMIT}"
+HARD_STOP="${HARD_STOP:-750}"
+
+if [[ "$HASH_LIMIT" -eq "$DEFAULT_HASH_LIMIT" ]]; then
+  EXPECTED_PROFILES_FOR_LIMIT="${EXPECTED_PROFILES_FOR_LIMIT:-85}"
+fi
 
 cleanup() {
   export HOME="$REAL_HOME"
@@ -14,6 +21,20 @@ cleanup() {
 on_interrupt() {
   cleanup
   exit 130
+}
+
+print_timing_footer() {
+  END_TS=$(date +%s)
+  DIFF=$((END_TS - START_TS))
+
+  if date -d @0 +%H:%M:%S >/dev/null 2>&1; then
+    ELAPSED=$(date -u -d "@$DIFF" +%H:%M:%S)
+  else
+    ELAPSED=$(date -u -r "$DIFF" +%H:%M:%S)
+  fi
+
+  echo "   Start at  $START_TIME"
+  echo "   Duration  $ELAPSED"
 }
 
 trap cleanup EXIT
@@ -44,7 +65,7 @@ echo "Running short-hash expansion test..."
 echo "Test HOME: $TEST_HOME"
 echo
 START_TS=$(date +%s)
-START_TIME=$(date +"%H:%M:%S")
+START_TIME=$(date +"%H:%M:%S.%N" | cut -b1-12)
 
 n=0
 
@@ -83,8 +104,8 @@ while true; do
     console.log([...new Set(profiles.map(p => p.ctxHash?.length ?? 0))].join(","))
   ' "$PROFILES_FILE")
 
-  printf "n=%04d profiles=%s hashAbbrev=%s ctxHashLengths=%s duration=%sms\n" \
-    "$n" "$profile_count" "$hash_abbrev" "$hash_lengths" "$duration_ms"
+  printf "%s n=%04d profiles=%s hashAbbrev=%s ctxHashLengths=%s duration=%sms\n" \
+    "$(date +"%H:%M:%S.%N" | cut -b1-12)"  "$n" "$profile_count" "$hash_abbrev" "$hash_lengths" "$duration_ms"
 
   if [[ "$hash_abbrev" -ge $HASH_LIMIT ]]; then
     break
@@ -101,8 +122,17 @@ done
 echo
 echo "PASS: short-hash expansion reached hashAbbrev=${hash_abbrev}"
 
-END_TS=$(date +%s)
-DURATION=$(awk "BEGIN { printf \"%.2f\", $END_TS - $START_TS }")
+if [[ -n "${EXPECTED_PROFILES_FOR_LIMIT:-}" ]]; then
+  if [[ "$profile_count" -eq "$EXPECTED_PROFILES_FOR_LIMIT" ]]; then
+    echo "PASS: expected profile count reached: ${profile_count}"
+  else
+    echo "FAIL: expected hashAbbrev=${HASH_LIMIT} after ${EXPECTED_PROFILES_FOR_LIMIT} profiles, got ${profile_count}"
+    echo "This may be legitimate if canonical profile generation or hashing changed."
+    print_timing_footer
+    exit 1
+  fi
+else
+  echo "PASS: no expected profile count configured"
+fi
 
-echo "   Start at  $START_TIME"
-echo "   Duration  ${DURATION}s"
+print_timing_footer

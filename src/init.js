@@ -1,7 +1,11 @@
 import fs from 'node:fs/promises'
-import { defaultConfig, loadConfig, saveConfig, resolveConfigPath } from './config-file.js'
-import { loadAllProfiles, saveProfiles, resolveProfilesPath } from './profiles-file.js'
+import {defaultConfig, loadRawConfig, resolveConfigPath, saveConfig} from './config-file.js'
+import {loadAllProfiles, resolveProfilesPath, saveProfiles} from './profiles-file.js'
 
+/**
+ * @param {string} path
+ * @returns Promise<boolean>
+ * */
 async function exists(path) {
   try {
     await fs.access(path)
@@ -27,13 +31,14 @@ export async function initializeStorage() {
     await saveConfig(defaultConfig())
     createdConfig = true
   } else {
-    const config = await loadConfig()
+    const rawConfig = await loadRawConfig()
+
     const normalized = {
       ...defaultConfig(),
-      ...config
+      ...rawConfig
     }
 
-    if (JSON.stringify(normalized) !== JSON.stringify(config)) {
+    if (JSON.stringify(normalized) !== JSON.stringify(rawConfig)) {
       await saveConfig(normalized)
       updatedConfig = true
     }

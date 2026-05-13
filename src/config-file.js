@@ -1,6 +1,7 @@
 import fs from 'node:fs/promises'
 import path from 'node:path'
 import os from 'node:os'
+
 /** @typedef {import('./models.js').Config} Config */
 
 /**
@@ -155,4 +156,17 @@ export async function saveConfig(config, options = {}) {
     timeout: config.timeout
   }, null, 2), 'utf8')
   await fs.rename(tmpPath, configPath)
+}
+
+/**
+ * Load config exactly as stored on disk.
+ *
+ * Unlike loadConfig(), this does not apply defaults.
+ *
+ * @param {{ configPath?: string, platform?: string, homeDir?: string }=} options
+ * @returns {Promise<Partial<Config>>}
+ */
+export async function loadRawConfig(options = {}) {
+  const text = await fs.readFile(resolveConfigPath(options), 'utf8')
+  return JSON.parse(text)
 }

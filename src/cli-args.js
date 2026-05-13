@@ -5,6 +5,7 @@
  * @returns {CliArgs}
  */
 export function parseArgs(argv) {
+  let init=false
   let profileLabel = null
   let show = false
   let help = false
@@ -74,6 +75,8 @@ export function parseArgs(argv) {
       save = true
     } else if (arg === '--show') {
       show = true
+    } else if (arg === '--init') {
+      init = true
     } else if (arg === '--help' || arg === '-h') {
       help = true
     } else {
@@ -81,12 +84,13 @@ export function parseArgs(argv) {
     }
   }
 
-  return { profileLabel, show, help, list, bump, save, create, deleteLabel, showProfileLabel, configPresent, configArg, editLabel }
+  return { init, profileLabel, show, help, list, bump, save, create, deleteLabel, showProfileLabel, configPresent, configArg, editLabel }
 }
 
 export function usageText() {
   return [
     'Usage:',
+    '  dpg-cli --init',
     '  dpg-cli -p <label>',
     '  dpg-cli --profile <label>',
     '  dpg-cli -p <label> --show',
@@ -109,6 +113,7 @@ export function usageText() {
     '  dpg-cli --help',
     '',
     'Options:',
+    '      --init                   Initialise config and profiles storage',
     '  -p, --profile <label>        Generate password from existing profile',
     '  -b, --bump <label>           Generate password using counter + 1',
     '      --save                   Persist changes made by --bump',

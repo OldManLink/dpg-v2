@@ -175,11 +175,32 @@ Recommended values:
 
 | HASH_LIMIT | Suggested HARD_STOP |
 |------------|--------------------:|
-| 3          |                 500 |
-| 4          |                 500 |
-| 5          |                1000 |
-| 6          |                2000 |
-| 7          |                3000 |
+| 3          |                  75 |
+| 4          |                 150 |
+| 5          |                 300 |
+| 6          |                 600 |
+| 7          |                1500 |
+| 8          |                7500 |
+
+## Reference Runs
+
+The `results/` directory contains archived transcripts from long-running manual short-hash expansion experiments performed on real hardware.
+
+These are not part of CI, but serve as:
+
+- performance reference data
+- scalability validation
+- regression comparison material
+- empirical justification for the default `hashAbbrev = 7`
+
+Example observed expansion points:
+
+| hashAbbrev reached | profiles required |
+|--------------------|------------------:|
+| 7                  |              1409 |
+| 8                  |              7100 |
+
+The `hashAbbrev = 8` measurement was performed on a 2024 Apple M4 Max MacBook Pro and still completed expansion comfortably within normal interactive CLI times.
 
 ---
 

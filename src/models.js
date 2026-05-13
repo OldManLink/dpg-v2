@@ -49,6 +49,7 @@
 
 /**
  * @typedef {{
+ *   init: boolean,
  *   profileLabel: string | null,
  *   show: boolean,
  *   help: boolean,
@@ -77,6 +78,7 @@
  *   loadConfig?: () => Promise<Config>,
  *   saveConfig?: (config: Config) => Promise<void>,
  *   ProfilesRepositoryClass?: ProfilesRepositoryFactory,
+ *   initializeStorage?: () => Promise<any>
  *   stdout?: { write: (s: string) => void },
  *   stderr?: { write: (s: string) => void }
  * }} CliDeps

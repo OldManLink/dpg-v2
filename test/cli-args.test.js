@@ -47,6 +47,10 @@ describe('parseArgs', () => {
     expect(parseArgs(['--show-profile', 'github-main'])).toEqual(makeCliArgs({showProfileLabel: 'github-main'}))
   })
 
+  it('parses --init', () => {
+    expect(parseArgs(['--init'])).toEqual(makeCliArgs({init: true}))
+  })
+
   it('parses --help', () => {
     expect(parseArgs(['--help'])).toEqual(makeCliArgs({help: true}))
   })

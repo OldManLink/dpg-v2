@@ -17,7 +17,7 @@ describe('defaultConfig', () => {
       editor: '',
       hashAbbrev: 7,
       sortBy: 'label',
-      timeout: 0,
+      timeout: 90,
     })
   })
 })
@@ -77,7 +77,7 @@ describe('applyConfigUpdate', () => {
       editor: '',
       hashAbbrev: 7,
       sortBy: 'label',
-      timeout: 0
+      timeout: 90
     })
   })
 
@@ -86,7 +86,7 @@ describe('applyConfigUpdate', () => {
       editor: 'nano',
       hashAbbrev: 7,
       sortBy: 'label',
-      timeout: 0
+      timeout: 90
     })
   })
 

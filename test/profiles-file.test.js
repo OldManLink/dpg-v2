@@ -3,7 +3,7 @@ import path from 'node:path'
 import {resolveProfilesPath, loadAllProfiles} from '../src/profiles-file.js'
 
 describe('resolveProfilesPath', () => {
-  it('uses ~/.dpg-v2/profiles.json on macOS', () => {
+  it('uses ~/.dpg-v2/profiles.json on macOS', async () => {
     const result = resolveProfilesPath({
       platform: 'darwin',
       homeDir: '/Users/peter'
@@ -12,7 +12,7 @@ describe('resolveProfilesPath', () => {
     expect(result).toBe('/Users/peter/.dpg-v2/profiles.json')
   })
 
-  it('uses ~/.dpg-v2/profiles.json on Linux', () => {
+  it('uses ~/.dpg-v2/profiles.json on Linux', async () => {
     const result = resolveProfilesPath({
       platform: 'linux',
       homeDir: '/home/peter'
@@ -21,7 +21,7 @@ describe('resolveProfilesPath', () => {
     expect(result).toBe('/home/peter/.dpg-v2/profiles.json')
   })
 
-  it('uses %USERPROFILE%\\.dpg-v2\\profiles.json on Windows', () => {
+  it('uses %USERPROFILE%\\.dpg-v2\\profiles.json on Windows', async () => {
     const result = resolveProfilesPath({
       platform: 'win32',
       homeDir: 'C:\\Users\\Peter'
@@ -31,8 +31,8 @@ describe('resolveProfilesPath', () => {
   })
 
   it('throws for unsupported platform', () => {
-    expect(() =>
-      resolveProfilesPath({
+    expect( () =>
+       resolveProfilesPath({
         platform: 'plan9',
         homeDir: '/tmp'
       })

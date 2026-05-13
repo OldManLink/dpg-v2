@@ -1,3 +1,4 @@
+import { initializeStorage } from './init.js'
 import { createDefaultProfile } from './profile-factory.js'
 import { promptForMasterPassword } from './prompt.js'
 import { generatePassword } from './generate.js'
@@ -22,6 +23,7 @@ import {formatDuplicateDerivedPasswordWarnings} from "./duplicate-contexts.js";
  */
 export async function runCli(args, deps = {}) {
   const {
+    initializeStorage: initStorage = initializeStorage,
     promptForMasterPassword: prompt = promptForMasterPassword,
     generatePassword: generate = generatePassword,
     copyToClipboard: copy = copyToClipboard,
@@ -44,6 +46,28 @@ export async function runCli(args, deps = {}) {
 
   try {
     checkForConflicts(args)
+
+    if (args.init) {
+      try {
+        const result = await initStorage()
+        const lines = []
+
+        if (result.createdConfig) lines.push('Created config.json')
+        else if (result.updatedConfig) lines.push('Updated config.json')
+
+        if (result.createdProfiles) lines.push('Created profiles.json')
+
+        stdout.write(lines.length > 0
+          ? `${lines.join('\n')}\n`
+          : 'Nothing to initialize\n'
+        )
+
+        return 0
+      } catch (err) {
+        stderr.write(`${err.message}\n`)
+        return 1
+      }
+    }
 
     if (args.list) {
       const repo = await ProfilesRepositoryClass.load()
@@ -325,6 +349,11 @@ function checkForConflicts(args) {
   const primary = []
   const usedTokens = []
 
+  if (args.init) {
+    primary.push('init')
+    usedTokens.push('--init')
+  }
+
   if (args.profileLabel) {
     primary.push('profile')
     usedTokens.push('-p')
@@ -332,7 +361,7 @@ function checkForConflicts(args) {
 
   if (args.list) {
     primary.push('list')
-    usedTokens.push('-l')
+    usedTokens.push('--list')
   }
 
   if (args.bump) {

@@ -223,4 +223,27 @@ describe('runCli', () => {
     expect(exitCode).toBe(1)
     expect(stderr.write).toHaveBeenCalledWith(expect.stringMatching(/conflicting commands/i))
   })
+
+  it('fails if --show is used with --init', async () => {
+    const stderr = { write: vi.fn() }
+
+    const exitCode = await runCli(
+      makeCliArgs({ init: true, show: true }),
+      { stdout: { write: vi.fn() }, stderr }
+    )
+
+    expect(exitCode).toBe(1)
+  })
+
+  it('fails if --config is used with --init', async () => {
+    const stderr = { write: vi.fn() }
+
+    const exitCode = await runCli(
+      makeCliArgs({ configPresent: true, init: true }),
+      { stdout: { write: vi.fn() }, stderr }
+    )
+
+    expect(exitCode).toBe(1)
+    expect(stderr.write).toHaveBeenCalledWith(expect.stringMatching(/conflicting commands/i))
+  })
 })

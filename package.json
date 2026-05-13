@@ -9,7 +9,8 @@
   "scripts": {
     "test": "vitest --exclude 'test/**/*.slow.test.js'",
     "test:slow": "vitest run test/kdf.slow.test.js test/generate.slow.test.js --reporter=verbose",
-    "test:integration": "bash integration/run.sh",
+    "test:init": "bash integration/init/run.sh",
+    "test:integration": "bash integration/run.sh && bash integration/init/run.sh",
     "test:short-hash": "bash integration/short-hash/run.sh",
     "test:all": "vitest run --reporter=verbose"
   },

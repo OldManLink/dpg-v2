@@ -147,6 +147,44 @@ npm run test:slow
 
 ---
 
+## 🚀 Initialization
+
+Before first use, initialize DPG storage:
+
+```bash
+dpg-cli --init
+```
+
+This creates:
+
+- `~/.dpg-v2/config.json`
+- `~/.dpg-v2/profiles.json`
+
+Example output:
+
+```text
+Created config.json
+Created profiles.json
+```
+
+The command is safe to run repeatedly.
+
+If files already exist, DPG will leave them intact and only add any missing default config values when needed.
+
+Example:
+
+```text
+Nothing to initialize
+```
+
+or:
+
+```text
+Updated config.json
+```
+
+---
+
 ## 💻 CLI
 
 DPG v2 includes a CLI for generating passwords from existing profiles.

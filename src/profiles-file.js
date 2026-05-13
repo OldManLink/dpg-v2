@@ -4,10 +4,14 @@ import fs from 'node:fs/promises'
 /** @typedef {import('./models.js').Profile} Profile */
 
 /**
- * @param {{ platform?: string, homeDir?: string }=} options
+ * @param {{ platform?: string, homeDir?: string, profilesPath?: string  }=} options
  * @returns {string}
  */
 export function resolveProfilesPath(options = {}) {
+  if (options.profilesPath) {
+    return options.profilesPath
+  }
+
   const platform = options.platform ?? process.platform
   const homeDir = options.homeDir ?? os.homedir()
 

@@ -3,10 +3,27 @@ import path from 'node:path'
 import os from 'node:os'
 /** @typedef {import('./models.js').Config} Config */
 
-function resolveConfigPath(options = {}) {
-  return options.configPath ?? path.join(os.homedir(), '.dpg-v2', 'config.json')
-}
+/**
+ * @param {{ platform?: string, homeDir?: string, configPath?: string }=} options
+ * @returns {string}
+ */
+export function resolveConfigPath(options = {}) {
+  if (options.configPath) {
+    return options.configPath
+  }
 
+  const platform = options.platform ?? process.platform
+  const homeDir = options.homeDir ?? os.homedir()
+
+  switch (platform) {
+    case 'darwin':
+    case 'linux':
+    case 'win32':
+      return path.join(homeDir, '.dpg-v2', 'config.json')
+    default:
+      throw new Error(`Unsupported platform: ${platform}`)
+  }
+}
 /**
  * @returns {Config}
  */
@@ -15,7 +32,7 @@ export function defaultConfig() {
     editor: '',
     hashAbbrev: 7,
     sortBy: 'label',
-    timeout: 0
+    timeout: 90
   }
 }
 

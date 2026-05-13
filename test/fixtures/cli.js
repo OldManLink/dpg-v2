@@ -6,6 +6,7 @@
  */
 export function makeCliArgs(overrides = {}) {
   return {
+    init: false,
     profileLabel: null,
     show: false,
     help: false,
